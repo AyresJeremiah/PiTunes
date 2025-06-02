@@ -42,7 +42,7 @@ cd jukebox
 2. **Run the setup script**
 
 ```bash
-bash bootstrap.sh
+bash install.sh
 ```
 
 > This will:
