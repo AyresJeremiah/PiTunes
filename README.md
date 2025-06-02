@@ -42,7 +42,7 @@ cd jukebox
 2. **Run the setup script**
 
 ```bash
-bash install.sh
+sudo bash install.sh
 ```
 
 > This will:
