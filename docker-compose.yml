@@ -1,0 +1,30 @@
+version: '3.9'
+
+services:
+  backend:
+    build: ./backend
+    container_name: jukebox-backend
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    volumes:
+      - ./backend/song_cache:/app/song_cache
+      - /etc/asound.conf:/etc/asound.conf
+    ports:
+      - "5219:80"
+    depends_on:
+      - frontend
+    networks:
+      - jukebox-net
+    devices:
+      - "/dev/snd:/dev/snd"
+  frontend:
+    build: ./frontend
+    container_name: jukebox-frontend
+    ports:
+      - "4200:80"
+    networks:
+      - jukebox-net
+
+networks:
+  jukebox-net:
+    driver: bridge

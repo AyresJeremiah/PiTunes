@@ -1,0 +1,53 @@
+.idea/*
+# Global
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.env
+
+# Angular build output
+frontend/dist/
+frontend/.angular/
+frontend/.idea/
+frontend/.vscode/
+frontend/.env
+
+# ASP.NET
+backend/bin/
+backend/obj/
+backend/.vs/
+backend/appsettings.*.json
+backend/*.user
+backend/*.db
+
+# Docker
+**/Dockerfile
+docker-compose.override.yml
+*.pid
+
+# OS-specific
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# Visual Studio Code
+.vscode/
+
+# Build artifacts
+**/publish/
+**/coverage/
+/backend/song_cache/
