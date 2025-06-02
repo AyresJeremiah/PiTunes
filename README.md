@@ -36,7 +36,7 @@ This project is a full-stack, self-hosted, YouTube-powered jukebox system, desig
 
 ```bash
 git clone https://your-repo-url.git
-cd jukebox
+cd PiTunes
 ```
 
 2. **Run the setup script**
