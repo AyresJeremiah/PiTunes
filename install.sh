@@ -40,4 +40,11 @@ docker-compose build
 echo "---- Starting containers ----"
 docker-compose up -d
 
+echo "---- Adding Audio to the backend container ----"
+docker run --rm \
+  --device /dev/snd \
+  --volume /etc/asound.conf:/etc/asound.conf \
+  jukebox-backend
+
+
 echo "---- All done ----"
