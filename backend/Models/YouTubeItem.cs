@@ -1,11 +1,11 @@
 namespace backend.Models;
 
-public class YouTubeSearchResult
+public class YouTubeItem
 {
     // Parameterless constructor required for EF Core
-    public YouTubeSearchResult() { }
+    public YouTubeItem() { }
 
-    public YouTubeSearchResult(string id, string title, string url, string? thumbnail)
+    public YouTubeItem(string id, string title, string url, string? thumbnail)
     {
         Id = id;
         Title = title;

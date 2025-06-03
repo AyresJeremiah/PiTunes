@@ -27,7 +27,7 @@ namespace backend.Controllers
         }
 
         [HttpPost("queue")]
-        public async Task<IActionResult> Queue([FromBody] QueueItem request)
+        public async Task<IActionResult> Queue([FromBody] YouTubeItem request)
         {
             _youtube.Enqueue(request);
             return Ok();

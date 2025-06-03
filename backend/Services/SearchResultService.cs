@@ -6,29 +6,35 @@ namespace Services
     public class SearchResultService : ISearchResultService
     {
         private readonly PiTunesDbContext _context;
+        private ISearchResultService _searchResultServiceImplementation;
 
         public SearchResultService(PiTunesDbContext context)
         {
             _context = context;
         }
 
-        public async Task<IEnumerable<YouTubeSearchResult>> GetAllAsync()
+        public async Task<IEnumerable<YouTubeItem>> GetAllAsync()
         {
             return await _context.YouTubeSearchResults.ToListAsync();
         }
 
-        public async Task<YouTubeSearchResult?> GetByIdAsync(int id)
+        public Task<YouTubeItem?> GetByIdAsync(int id)
+        {
+            return _searchResultServiceImplementation.GetByIdAsync(id);
+        }
+
+        public async Task<YouTubeItem?> GetByIdAsync(string id )
         {
             return await _context.YouTubeSearchResults.FindAsync(id);
         }
 
-        public async Task AddAsync(YouTubeSearchResult entity)
+        public async Task AddAsync(YouTubeItem entity)
         {
             _context.YouTubeSearchResults.Add(entity);
             await _context.SaveChangesAsync();
         }
         
-        public async Task AddMultipleAsync(IEnumerable<YouTubeSearchResult> entities)
+        public async Task AddMultipleAsync(IEnumerable<YouTubeItem> entities)
         {
             var ids = entities.Select(e => e.Id).ToList();
 
@@ -51,7 +57,7 @@ namespace Services
         }
 
 
-        public async Task UpdateAsync(YouTubeSearchResult entity)
+        public async Task UpdateAsync(YouTubeItem entity)
         {
             _context.YouTubeSearchResults.Update(entity);
             await _context.SaveChangesAsync();

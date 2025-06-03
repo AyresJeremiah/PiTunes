@@ -2,6 +2,8 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.Json;
 using backend.Models;
+using Microsoft.OpenApi.Writers;
+using Services;
 
 namespace backend.Services
 {
@@ -17,17 +19,19 @@ namespace backend.Services
         private const string FfplayPath = "ffplay";
 #endif
 
-        private readonly ConcurrentQueue<QueueItem> _incomingQueue = new();
-        private readonly ConcurrentQueue<QueueItem> _queue = new();
+        private readonly ConcurrentQueue<YouTubeItem> _incomingQueue = new();
+        private readonly ConcurrentQueue<YouTubeItem> _queue = new();
         private readonly CancellationTokenSource _cts = new();
         private readonly SemaphoreSlim _queueSignal = new(0);
+        private readonly IServiceScopeFactory _scopeFactory;
 
         private Process? _ffplayProcess;
         private bool _isPlaying = false;
-        private QueueItem? nowPlaying;
+        private YouTubeItem? nowPlaying;
 
-        public YouTubeService()
+        public YouTubeService(IServiceScopeFactory scopeFactory)
         {
+            _scopeFactory = scopeFactory;
             Directory.CreateDirectory(CacheDir);
             Task.Run(ProcessIncomingQueue);
         }
@@ -35,24 +39,24 @@ namespace backend.Services
        
         // Public APIs
 
-        public void Enqueue(QueueItem item)
+        public void Enqueue(YouTubeItem item)
         {
             _incomingQueue.Enqueue(item);
             _queueSignal.Release();
         }
 
-        public Queue<QueueItem> GetQueue() => new Queue<QueueItem>(_queue);
+        public Queue<YouTubeItem> GetQueue() => new Queue<YouTubeItem>(_queue);
 
-        public QueueItem? GetNowPlaying() => nowPlaying;
+        public YouTubeItem? GetNowPlaying() => nowPlaying;
 
         public void Skip()
         {
             _ffplayProcess?.Kill();
         }
 
-        public static async Task<List<YouTubeSearchResult>> SearchAsync(string query)
+        public static async Task<List<YouTubeItem>> SearchAsync(string query)
         {
-            var results = new List<YouTubeSearchResult>();
+            var results = new List<YouTubeItem>();
 
             var psi = new ProcessStartInfo
             {
@@ -79,7 +83,7 @@ namespace backend.Services
                     if (json.RootElement.TryGetProperty("thumbnails", out var thumbs) && thumbs.GetArrayLength() > 0)
                         thumbnail = thumbs[0].GetProperty("url").GetString();
 
-                    results.Add(new YouTubeSearchResult(id, title, url, thumbnail));
+                    results.Add(new YouTubeItem(id, title, url, thumbnail));
                 }
             }
 
@@ -131,7 +135,7 @@ namespace backend.Services
                 this.PlayRandom();
             }
         }
-        private void PlayRandom()
+        private async void PlayRandom()
         {
             if (_isPlaying) return;
 
@@ -152,19 +156,20 @@ namespace backend.Services
             var random = new Random();
             var randomFile = files[random.Next(files.Length)];
 
-            var item = new QueueItem
-            {
-                Id = Path.GetFileNameWithoutExtension(randomFile),
-                Title = "Playing Random Song",
-                Url = "",
-                Thumbnail = "/assets/default-thumbnail.jpg"
-            };
+            using var scope = _scopeFactory.CreateScope();
+
+            var searchResultService = scope.ServiceProvider.GetRequiredService<SearchResultService>();
+            var fileName = Path.GetFileNameWithoutExtension(randomFile);
+            var item = await searchResultService.GetByIdAsync(fileName);
+
+
+            // var item = await searchResultService.GetByIdAsync(Path.GetFileNameWithoutExtension(randomFile));
 
             Console.WriteLine($"Randomly selected cached song: {item.Id}");
             _ = PlayAsync(item);
         }
 
-        private async Task PlayAsync(QueueItem item)
+        private async Task PlayAsync(YouTubeItem item)
         {
             if (_isPlaying) return;
 
