@@ -3,9 +3,10 @@ version: '3.9'
 services:
   backend:
     build: ./backend
-    container_name: jukebox-backend
+    container_name: PiTunes-backend
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pitunes_db;Username=pitunes;Password=pitunes_pw
     volumes:
       - ./backend/song_cache:/app/song_cache
       - /etc/asound.conf:/etc/asound.conf
@@ -13,18 +14,38 @@ services:
       - "5219:80"
     depends_on:
       - frontend
+      - postgres  # <-- add postgres dependency here
     networks:
-      - jukebox-net
-    devices:
-      - "/dev/snd:/dev/snd"
+      - PiTunes-net
+#    devices:
+#      - "/dev/snd:/dev/snd"
+
   frontend:
     build: ./frontend
-    container_name: jukebox-frontend
+    container_name: PiTunes-frontend
     ports:
       - "4200:80"
     networks:
-      - jukebox-net
+      - PiTunes-net
+
+  postgres:
+    image: postgres:15
+    container_name: PiTunes-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: pitunes
+      POSTGRES_PASSWORD: pitunes_pw
+      POSTGRES_DB: pitunes_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - PiTunes-net
+
+volumes:
+  postgres-data:
 
 networks:
-  jukebox-net:
+  PiTunes-net:
     driver: bridge

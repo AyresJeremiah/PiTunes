@@ -32,8 +32,7 @@ namespace backend.Services
             Task.Run(ProcessIncomingQueue);
         }
 
-        public record YouTubeSearchResult(string Id, string Title, string Url, string Thumbnail);
-
+       
         // Public APIs
 
         public void Enqueue(QueueItem item)
@@ -91,7 +90,7 @@ namespace backend.Services
                 var error = await process.StandardError.ReadToEndAsync();
                 throw new Exception($"yt-dlp failed: {error}");
             }
-
+            
             return results;
         }
 
