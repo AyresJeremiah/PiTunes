@@ -21,7 +21,24 @@ namespace backend.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("backend.Models.YouTubeSearchResult", b =>
+            modelBuilder.Entity("backend.Models.QueueItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("VideoId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("QueueItem");
+                });
+
+            modelBuilder.Entity("backend.Models.YouTubeItem", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text");
@@ -40,7 +57,7 @@ namespace backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("YouTubeSearchResults");
+                    b.ToTable("YouTubeItem");
                 });
 #pragma warning restore 612, 618
         }

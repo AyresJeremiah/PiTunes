@@ -9,7 +9,8 @@ namespace backend.Models
         {
         }
 
-        public DbSet<YouTubeItem> YouTubeSearchResults { get; set; }
+        public DbSet<YouTubeItem> YouTubeItem { get; set; }
+        public DbSet<QueueItem> QueueItem { get; set; }
 
         // We will add the other tables here later
     }

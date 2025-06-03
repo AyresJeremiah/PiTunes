@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -11,7 +12,20 @@ namespace backend.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "YouTubeSearchResults",
+                name: "QueueItem",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    VideoId = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QueueItem", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "YouTubeItem",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
@@ -21,7 +35,7 @@ namespace backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_YouTubeSearchResults", x => x.Id);
+                    table.PrimaryKey("PK_YouTubeItem", x => x.Id);
                 });
         }
 
@@ -29,7 +43,10 @@ namespace backend.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "YouTubeSearchResults");
+                name: "QueueItem");
+
+            migrationBuilder.DropTable(
+                name: "YouTubeItem");
         }
     }
 }

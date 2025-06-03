@@ -15,7 +15,7 @@ namespace Services
 
         public async Task<IEnumerable<YouTubeItem>> GetAllAsync()
         {
-            return await _context.YouTubeSearchResults.ToListAsync();
+            return await _context.YouTubeItem.ToListAsync();
         }
 
         public Task<YouTubeItem?> GetByIdAsync(int id)
@@ -25,12 +25,12 @@ namespace Services
 
         public async Task<YouTubeItem?> GetByIdAsync(string id )
         {
-            return await _context.YouTubeSearchResults.FindAsync(id);
+            return await _context.YouTubeItem.FindAsync(id);
         }
 
         public async Task AddAsync(YouTubeItem entity)
         {
-            _context.YouTubeSearchResults.Add(entity);
+            _context.YouTubeItem.Add(entity);
             await _context.SaveChangesAsync();
         }
         
@@ -39,7 +39,7 @@ namespace Services
             var ids = entities.Select(e => e.Id).ToList();
 
             // Get existing IDs from the database
-            var existingIds = await _context.YouTubeSearchResults
+            var existingIds = await _context.YouTubeItem
                 .Where(e => ids.Contains(e.Id))
                 .Select(e => e.Id)
                 .ToListAsync();
@@ -51,7 +51,7 @@ namespace Services
 
             if (newEntities.Any())
             {
-                await _context.YouTubeSearchResults.AddRangeAsync(newEntities);
+                await _context.YouTubeItem.AddRangeAsync(newEntities);
                 await _context.SaveChangesAsync();
             }
         }
@@ -59,16 +59,16 @@ namespace Services
 
         public async Task UpdateAsync(YouTubeItem entity)
         {
-            _context.YouTubeSearchResults.Update(entity);
+            _context.YouTubeItem.Update(entity);
             await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(int id)
         {
-            var entity = await _context.YouTubeSearchResults.FindAsync(id);
+            var entity = await _context.YouTubeItem.FindAsync(id);
             if (entity != null)
             {
-                _context.YouTubeSearchResults.Remove(entity);
+                _context.YouTubeItem.Remove(entity);
                 await _context.SaveChangesAsync();
             }
         }
