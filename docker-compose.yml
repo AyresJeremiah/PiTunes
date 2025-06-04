@@ -17,8 +17,8 @@ services:
       - postgres  # <-- add postgres dependency here
     networks:
       - PiTunes-net
-#    devices:
-#      - "/dev/snd:/dev/snd"
+    devices:
+      - "/dev/snd:/dev/snd"
 
   frontend:
     build: ./frontend
