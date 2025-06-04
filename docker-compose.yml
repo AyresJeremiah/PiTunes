@@ -4,6 +4,7 @@ services:
   backend:
     build: ./backend
     container_name: PiTunes-backend
+    restart: always
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pitunes_db;Username=pitunes;Password=pitunes_pw
@@ -23,6 +24,7 @@ services:
   frontend:
     build: ./frontend
     container_name: PiTunes-frontend
+    restart: always
     ports:
       - "4200:80"
     networks:
