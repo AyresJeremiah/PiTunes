@@ -71,7 +71,7 @@ namespace backend.Services
             var psi = new ProcessStartInfo
             {
                 FileName = YtDlpPath,
-                Arguments = $"ytsearch10:\"{query}\" --print-json --flat-playlist",
+                ArgumentList = { $"ytsearch10:{query}", "--print-json", "--flat-playlist" },
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
