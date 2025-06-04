@@ -167,7 +167,7 @@ namespace backend.Services
             }
         }
 
-        private void CheckAndPlayNext()
+        private async Task CheckAndPlayNext()
         {
             if (_isPlaying) return;
 
@@ -175,7 +175,7 @@ namespace backend.Services
             {
                 using var scope = _scopeFactory.CreateScope();
                 var queueItemResult = scope.ServiceProvider.GetRequiredService<IQueueItemResult>();
-                queueItemResult.DeleteByVideoIdAsync(nextItem.Id);
+                await queueItemResult.DeleteByVideoIdAsync(nextItem.Id);
                 Console.WriteLine($"Now playing: {nextItem.Title}");
                 _ = PlayAsync(nextItem);
             }
@@ -251,7 +251,7 @@ namespace backend.Services
         {
             _isPlaying = false;
             nowPlaying = null;
-            CheckAndPlayNext();
+            _ = CheckAndPlayNext();
         }
 
         private static async Task<string> DownloadAndCacheAsync(string videoId)
