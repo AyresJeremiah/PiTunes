@@ -1,10 +1,14 @@
-namespace backend.Models
+namespace backend.Models;
+
+public class QueueItem 
 {
-    public class QueueItem
+    // Parameterless constructor required for EF Core
+    public QueueItem() { }
+
+    public QueueItem(string videoId)
     {
-        public string Id { get; set; }
-        public string Title { get; set; }
-        public string Url { get; set; }
-        public string Thumbnail { get; set; }
+        VideoId = videoId;
     }
+    public int Id { get; set; }  // Auto-increment PK
+    public string VideoId { get; set; } = null!;
 }

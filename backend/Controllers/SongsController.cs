@@ -9,23 +9,28 @@ namespace backend.Controllers
     public class SongsController : ControllerBase
     {
         private readonly YouTubeService _youtube;
+        private readonly YouTubeItemResult _youTubeItemResult;
+        private readonly IQueueItemResult _queueItemResult;
 
-        public SongsController(YouTubeService youtube)
+        public SongsController(YouTubeService youtube, YouTubeItemResult youTubeItemResult, IQueueItemResult queueItemResult)
         {
             _youtube = youtube;
+            _youTubeItemResult = youTubeItemResult;
+            _queueItemResult = queueItemResult;
         }
 
         [HttpGet("search")]
         public async Task<IActionResult> Search(string query)
         {
             var results = await YouTubeService.SearchAsync(query);
+            await this._youTubeItemResult.AddMultipleAsync(results);
             return Ok(results);
         }
 
         [HttpPost("queue")]
-        public async Task<IActionResult> Queue([FromBody] QueueItem request)
+        public async Task<IActionResult> Queue([FromBody] YouTubeItem request)
         {
-            _youtube.Enqueue(request);
+            await _youtube.EnqueueAsync(request.Id, this._queueItemResult, _youTubeItemResult);
             return Ok();
         }
 

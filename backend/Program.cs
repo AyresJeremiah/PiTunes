@@ -1,4 +1,6 @@
 using backend.Services;
+using backend.Models;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +20,14 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Add DbContext with Postgres
+builder.Services.AddDbContext<PiTunesDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<YouTubeItemResult>();
+builder.Services.AddScoped<IQueueItemResult, QueueItemResult>();
 builder.Services.AddSingleton<YouTubeService>();
+
 
 
 var app = builder.Build();
@@ -30,6 +39,30 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+else
+{
+// Run migrations automatically on startup
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<PiTunesDbContext>();
+
+        var retryCount = 5;
+        while (retryCount > 0)
+        {
+            try
+            {
+                db.Database.Migrate();
+                break;
+            }
+            catch (Exception ex)
+            {
+                retryCount--;
+                Console.WriteLine($"Database migration failed: {ex.Message}. Retrying...");
+                Thread.Sleep(2000);
+            }
+        }
+    }
 }
 
 app.MapControllers();
