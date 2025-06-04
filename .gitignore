@@ -30,7 +30,6 @@ backend/*.user
 backend/*.db
 
 # Docker
-**/Dockerfile
 docker-compose.override.yml
 *.pid
 
