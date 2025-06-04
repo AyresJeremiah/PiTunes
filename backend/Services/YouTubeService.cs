@@ -32,7 +32,7 @@ namespace backend.Services
         {
             _scopeFactory = scopeFactory;
             Directory.CreateDirectory(CacheDir);
-            _ = this.LoadIncomingQueueAsync();
+            _ = this.LoadQueueFromDbAsync();
             Task.Run(ProcessIncomingQueue);
         }
         
@@ -109,7 +109,7 @@ namespace backend.Services
         }
         
         
-        private async Task LoadIncomingQueueAsync()
+        private async Task LoadQueueFromDbAsync()
         {
             
             using var scope = _scopeFactory.CreateScope();
@@ -137,10 +137,11 @@ namespace backend.Services
             {
                 if (youTubeDict.TryGetValue(queueItem.VideoId, out var youTubeItem))
                 {
-                    _incomingQueue.Enqueue(youTubeItem);
+                    _queue.Enqueue(youTubeItem);
                 }
             }
-            _queueSignal.Release();
+
+            await this.CheckAndPlayNext();
         }
 
 
