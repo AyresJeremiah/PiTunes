@@ -1,14 +1,14 @@
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Services
+namespace backend.Services
 {
-    public class SearchResultService : ISearchResultService
+    public class YouTubeItemResult : IYouTubeItemResult
     {
         private readonly PiTunesDbContext _context;
-        private ISearchResultService _searchResultServiceImplementation;
+        private IYouTubeItemResult _youTubeItemResultImplementation;
 
-        public SearchResultService(PiTunesDbContext context)
+        public YouTubeItemResult(PiTunesDbContext context)
         {
             _context = context;
         }
@@ -18,14 +18,16 @@ namespace Services
             return await _context.YouTubeItem.ToListAsync();
         }
 
-        public Task<YouTubeItem?> GetByIdAsync(int id)
-        {
-            return _searchResultServiceImplementation.GetByIdAsync(id);
-        }
-
-        public async Task<YouTubeItem?> GetByIdAsync(string id )
+        public async Task<YouTubeItem?> GetByIdAsync(string id)
         {
             return await _context.YouTubeItem.FindAsync(id);
+        }
+        
+        public async Task<List<YouTubeItem>> GetByIdsAsync(IEnumerable<string> ids)
+        {
+            return await _context.YouTubeItem
+                .Where(item => ids.Contains(item.Id))
+                .ToListAsync();
         }
 
         public async Task AddAsync(YouTubeItem entity)
@@ -34,7 +36,7 @@ namespace Services
             await _context.SaveChangesAsync();
         }
         
-        public async Task AddMultipleAsync(IEnumerable<YouTubeItem> entities)
+        public async Task AddMultipleAsync(IList<YouTubeItem> entities)
         {
             var ids = entities.Select(e => e.Id).ToList();
 
@@ -49,7 +51,7 @@ namespace Services
                 .Where(e => !existingIds.Contains(e.Id))
                 .ToList();
 
-            if (newEntities.Any())
+            if (newEntities.Count > 0)
             {
                 await _context.YouTubeItem.AddRangeAsync(newEntities);
                 await _context.SaveChangesAsync();

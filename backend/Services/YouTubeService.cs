@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Text.Json;
 using backend.Models;
 using Microsoft.OpenApi.Writers;
-using Services;
 
 namespace backend.Services
 {
@@ -33,17 +32,28 @@ namespace backend.Services
         {
             _scopeFactory = scopeFactory;
             Directory.CreateDirectory(CacheDir);
+            _ = this.LoadIncomingQueueAsync();
             Task.Run(ProcessIncomingQueue);
         }
-
-       
+        
         // Public APIs
-
-        public void Enqueue(YouTubeItem item)
+        public async Task EnqueueAsync(string videoId, IQueueItemResult queueItemResult, IYouTubeItemResult youTubeItemResult)
         {
+            var item = await youTubeItemResult.GetByIdAsync(videoId);
+            if(item?.Id == null)
+            {
+                throw new Exception($"YouTubeItem with ID {videoId} not found.");
+            }
+            
+            if (_incomingQueue.Any(x => x.Id == item.Id))
+            {
+                return; 
+            }
+            _ = queueItemResult.AddAsync(new QueueItem(item.Id));
             _incomingQueue.Enqueue(item);
             _queueSignal.Release();
         }
+
 
         public Queue<YouTubeItem> GetQueue() => new Queue<YouTubeItem>(_queue);
 
@@ -97,6 +107,42 @@ namespace backend.Services
             
             return results;
         }
+        
+        
+        private async Task LoadIncomingQueueAsync()
+        {
+            
+            using var scope = _scopeFactory.CreateScope();
+
+            var youTubeItemResult = scope.ServiceProvider.GetRequiredService<YouTubeItemResult>();
+            var queueItemResult = scope.ServiceProvider.GetRequiredService<IQueueItemResult>();
+
+            
+            var queueItems = await queueItemResult.GetAllAsync();
+
+            // Order by insertion order (PK Id)
+            var orderedQueueItems = queueItems.OrderBy(q => q.Id).ToList();
+
+            // Get all VideoIds in insertion order
+            var videoIds = orderedQueueItems.Select(q => q.VideoId).ToList();
+
+            // Load YouTubeItems
+            var youTubeItems = await youTubeItemResult.GetByIdsAsync(videoIds);
+
+            // Build a dictionary for quick lookup
+            var youTubeDict = youTubeItems.ToDictionary(x => x.Id, x => x);
+
+            // Preserve insertion order and match VideoIds to YouTubeItems
+            foreach (var queueItem in orderedQueueItems)
+            {
+                if (youTubeDict.TryGetValue(queueItem.VideoId, out var youTubeItem))
+                {
+                    _incomingQueue.Enqueue(youTubeItem);
+                }
+            }
+            _queueSignal.Release();
+        }
+
 
         // Private workers
 
@@ -127,6 +173,9 @@ namespace backend.Services
 
             if (_queue.TryDequeue(out var nextItem))
             {
+                using var scope = _scopeFactory.CreateScope();
+                var queueItemResult = scope.ServiceProvider.GetRequiredService<IQueueItemResult>();
+                queueItemResult.DeleteByVideoIdAsync(nextItem.Id);
                 Console.WriteLine($"Now playing: {nextItem.Title}");
                 _ = PlayAsync(nextItem);
             }
@@ -158,12 +207,9 @@ namespace backend.Services
 
             using var scope = _scopeFactory.CreateScope();
 
-            var searchResultService = scope.ServiceProvider.GetRequiredService<SearchResultService>();
+            var searchResultService = scope.ServiceProvider.GetRequiredService<YouTubeItemResult>();
             var fileName = Path.GetFileNameWithoutExtension(randomFile);
             var item = await searchResultService.GetByIdAsync(fileName);
-
-
-            // var item = await searchResultService.GetByIdAsync(Path.GetFileNameWithoutExtension(randomFile));
 
             Console.WriteLine($"Randomly selected cached song: {item.Id}");
             _ = PlayAsync(item);

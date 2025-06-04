@@ -1,11 +1,12 @@
 using backend.Models;
 
-namespace Services
+namespace backend.Services
 {
-    public interface ISearchResultService
+    public interface IYouTubeItemResult
     {
         Task<IEnumerable<YouTubeItem>> GetAllAsync();
-        Task<YouTubeItem?> GetByIdAsync(int id);
+        Task<YouTubeItem?> GetByIdAsync(string id);
+        Task<List<YouTubeItem>> GetByIdsAsync(IEnumerable<string> ids);
         Task AddAsync(YouTubeItem entity);
         Task UpdateAsync(YouTubeItem entity);
         Task DeleteAsync(int id);
