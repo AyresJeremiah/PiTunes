@@ -18,8 +18,8 @@ services:
       - postgres
     networks:
       - PiTunes-net
-#    devices:
-#      - /dev/snd
+    devices:
+      - /dev/snd
 
   frontend:
     build: ./frontend
