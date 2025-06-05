@@ -2,7 +2,8 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.Json;
 using backend.Models;
-using Microsoft.OpenApi.Writers;
+using Microsoft.AspNetCore.SignalR;
+using backend.hubs;
 
 namespace backend.Services
 {
@@ -23,15 +24,17 @@ namespace backend.Services
         private readonly CancellationTokenSource _cts = new();
         private readonly SemaphoreSlim _queueSignal = new(0);
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IHubContext<SocketHub> _hubContext;
         
 
         private Process? _ffplayProcess;
         private bool _isPlaying = false;
         private YouTubeItem? nowPlaying;
 
-        public YouTubeService(IServiceScopeFactory scopeFactory)
+        public YouTubeService(IServiceScopeFactory scopeFactory, IHubContext<SocketHub> hubContext)
         {
             _scopeFactory = scopeFactory;
+            _hubContext = hubContext;
             Directory.CreateDirectory(CacheDir);
             _ = this.LoadQueueFromDbAsync();
             Task.Run(ProcessIncomingQueue);
@@ -159,7 +162,8 @@ namespace backend.Services
                     {
                         await DownloadAndCacheAsync(item.Id);
                         _queue.Enqueue(item);
-                        CheckAndPlayNext();
+                        await SendQueueUpdateAsync();
+                        await CheckAndPlayNext();
                     }
                     catch (Exception ex)
                     {
@@ -167,6 +171,17 @@ namespace backend.Services
                     }
                 }
             }
+        }
+        
+        private async Task SendQueueUpdateAsync()
+        {
+            var queueArray = _queue.ToArray();
+            await _hubContext.Clients.All.SendAsync("ReceiveQueue", queueArray);
+        }
+        
+        private async Task SendNowPlayingUpdateAsync()
+        {
+            await _hubContext.Clients.All.SendAsync("ReceiveNowPlaying", nowPlaying);
         }
 
         private async Task CheckAndPlayNext()
@@ -178,6 +193,7 @@ namespace backend.Services
                 using var scope = _scopeFactory.CreateScope();
                 var queueItemResult = scope.ServiceProvider.GetRequiredService<IQueueItemResult>();
                 await queueItemResult.DeleteByVideoIdAsync(nextItem.Id);
+                await SendQueueUpdateAsync();
                 Console.WriteLine($"Now playing: {nextItem.Title}");
                 _ = PlayAsync(nextItem);
             }
@@ -223,6 +239,7 @@ namespace backend.Services
 
             _isPlaying = true;
             nowPlaying = item;
+            await this.SendNowPlayingUpdateAsync();
 
             var filePath = await DownloadAndCacheAsync(item.Id);
             Console.WriteLine($"Starting playback for {filePath}");
