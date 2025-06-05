@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { SongService } from '../../services/song.service';
-import { YouTubeItem } from '../../models/song.model';
-import { ToastService } from 'app/services/toast.service';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {SongService} from 'app/services/song.service';
+import {YouTubeItem} from 'app/models/song.model';
+import {ToastService} from 'app/services/toast.service';
+import {SocketService} from 'src/app/services/socket.service';
 
 @Component({
   selector: 'app-search',
@@ -12,16 +13,19 @@ import { ToastService } from 'app/services/toast.service';
   templateUrl: './search.component.html',
   styleUrls: ['./search.component.scss']
 })
-export class SearchComponent {
+export class SearchComponent implements OnInit, OnDestroy {
   query: string = '';
   results: YouTubeItem[] = [];
   nowPlaying: YouTubeItem | null = null;
-  poolingStarted: boolean = false;
   isQueueing: { [id: string]: boolean } = {};
   isSearching: boolean = false;
 
-
-  constructor(private songService: SongService, private toastService: ToastService) { }
+  constructor(
+    private songService: SongService,
+    private toastService: ToastService,
+    private socketService: SocketService
+  ) {
+  }
 
   search(): void {
     this.isSearching = true;
@@ -35,6 +39,7 @@ export class SearchComponent {
       }
     });
   }
+
   queueSong(song: YouTubeItem): void {
     this.isQueueing[song.id] = true;
     this.songService.queue(song).subscribe({
@@ -50,25 +55,18 @@ export class SearchComponent {
     });
   }
 
-  refreshNowPlaying(): void {
-    this.songService.getNowPlaying().subscribe(res => {
-      this.nowPlaying = res;
-    });
-    this.setPooling();
-  }
-
   skip(): void {
     this.songService.skip().subscribe(() => {
-      // console.log("Song skipped");
     });
   }
 
-  setPooling(): void {
-    if(!this.poolingStarted) {
-      this.poolingStarted = true;
-      setInterval(() => this.refreshNowPlaying(), 5000);
-    }
+  ngOnInit(): void {
+    // Subscribe to ReceiveNowPlaying event
+    this.socketService.onReceiveNowPlaying((item: YouTubeItem) => {
+      this.nowPlaying = item;
+    });
   }
 
-
+  ngOnDestroy(): void {
+  }
 }

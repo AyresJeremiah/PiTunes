@@ -29,4 +29,8 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.socketService.start();
   }
+
+  ngOnDestroy(): void {
+    this.socketService.stop();
+  }
 }
