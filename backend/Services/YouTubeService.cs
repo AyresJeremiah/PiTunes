@@ -2,7 +2,8 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.Json;
 using backend.Models;
-using Microsoft.OpenApi.Writers;
+using Microsoft.AspNetCore.SignalR;
+using backend.hubs;
 
 namespace backend.Services
 {
@@ -23,32 +24,38 @@ namespace backend.Services
         private readonly CancellationTokenSource _cts = new();
         private readonly SemaphoreSlim _queueSignal = new(0);
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IHubContext<SocketHub> _hubContext;
+
 
         private Process? _ffplayProcess;
         private bool _isPlaying = false;
-        private YouTubeItem? nowPlaying;
+        private YouTubeItem? _nowPlaying;
 
-        public YouTubeService(IServiceScopeFactory scopeFactory)
+        public YouTubeService(IServiceScopeFactory scopeFactory, IHubContext<SocketHub> hubContext)
         {
             _scopeFactory = scopeFactory;
+            _hubContext = hubContext;
             Directory.CreateDirectory(CacheDir);
             _ = this.LoadQueueFromDbAsync();
             Task.Run(ProcessIncomingQueue);
         }
-        
+
         // Public APIs
-        public async Task EnqueueAsync(string videoId, IQueueItemResult queueItemResult, IYouTubeItemResult youTubeItemResult)
+        public async Task EnqueueAsync(string videoId, IQueueItemResult queueItemResult,
+            IYouTubeItemResult youTubeItemResult)
         {
             var item = await youTubeItemResult.GetByIdAsync(videoId);
-            if(item?.Id == null)
+            if (item?.Id == null)
             {
                 throw new Exception($"YouTubeItem with ID {videoId} not found.");
             }
-            
-            if (_incomingQueue.Any(x => x.Id == item.Id))
+
+            if (_incomingQueue.Any(x => x.Id == item.Id) || _queue.Any(x => x.Id == item.Id))
             {
-                return; 
+                Console.WriteLine($"Item {item.Id} is already in the queue.");
+                return;
             }
+
             _ = queueItemResult.AddAsync(new QueueItem(item.Id));
             _incomingQueue.Enqueue(item);
             _queueSignal.Release();
@@ -57,7 +64,7 @@ namespace backend.Services
 
         public Queue<YouTubeItem> GetQueue() => new Queue<YouTubeItem>(_queue);
 
-        public YouTubeItem? GetNowPlaying() => nowPlaying;
+        public YouTubeItem? GetNowPlaying() => _nowPlaying;
 
         public void Skip()
         {
@@ -104,20 +111,19 @@ namespace backend.Services
                 var error = await process.StandardError.ReadToEndAsync();
                 throw new Exception($"yt-dlp failed: {error}");
             }
-            
+
             return results;
         }
-        
-        
+
+
         private async Task LoadQueueFromDbAsync()
         {
-            
             using var scope = _scopeFactory.CreateScope();
 
             var youTubeItemResult = scope.ServiceProvider.GetRequiredService<YouTubeItemResult>();
             var queueItemResult = scope.ServiceProvider.GetRequiredService<IQueueItemResult>();
 
-            
+
             var queueItems = await queueItemResult.GetAllAsync();
 
             // Order by insertion order (PK Id)
@@ -158,7 +164,8 @@ namespace backend.Services
                     {
                         await DownloadAndCacheAsync(item.Id);
                         _queue.Enqueue(item);
-                        CheckAndPlayNext();
+                        await SendQueueUpdateAsync();
+                        await CheckAndPlayNext();
                     }
                     catch (Exception ex)
                     {
@@ -166,6 +173,16 @@ namespace backend.Services
                     }
                 }
             }
+        }
+
+        private async Task SendQueueUpdateAsync()
+        {
+            await _hubContext.Clients.All.SendAsync("ReceiveQueue", _queue.ToArray());
+        }
+
+        private async Task SendNowPlayingUpdateAsync()
+        {
+            await _hubContext.Clients.All.SendAsync("ReceiveNowPlaying", _nowPlaying);
         }
 
         private async Task CheckAndPlayNext()
@@ -177,6 +194,7 @@ namespace backend.Services
                 using var scope = _scopeFactory.CreateScope();
                 var queueItemResult = scope.ServiceProvider.GetRequiredService<IQueueItemResult>();
                 await queueItemResult.DeleteByVideoIdAsync(nextItem.Id);
+                await SendQueueUpdateAsync();
                 Console.WriteLine($"Now playing: {nextItem.Title}");
                 _ = PlayAsync(nextItem);
             }
@@ -185,6 +203,7 @@ namespace backend.Services
                 this.PlayRandom();
             }
         }
+
         private async void PlayRandom()
         {
             if (_isPlaying) return;
@@ -211,6 +230,16 @@ namespace backend.Services
             var searchResultService = scope.ServiceProvider.GetRequiredService<YouTubeItemResult>();
             var fileName = Path.GetFileNameWithoutExtension(randomFile);
             var item = await searchResultService.GetByIdAsync(fileName);
+            if (item == null)
+            {
+                Console.WriteLine($"No YouTubeItem found for cached file: {fileName}");
+                item = new YouTubeItem(
+                    fileName,
+                    "Random Song",
+                    "",
+                    "/assets/default-thumbnail.jpg"
+                ); //Default
+            }
 
             Console.WriteLine($"Randomly selected cached song: {item.Id}");
             _ = PlayAsync(item);
@@ -221,7 +250,8 @@ namespace backend.Services
             if (_isPlaying) return;
 
             _isPlaying = true;
-            nowPlaying = item;
+            _nowPlaying = item;
+            await this.SendNowPlayingUpdateAsync();
 
             var filePath = await DownloadAndCacheAsync(item.Id);
             Console.WriteLine($"Starting playback for {filePath}");
@@ -251,7 +281,7 @@ namespace backend.Services
         private void OnProcessExited(object? sender, EventArgs e)
         {
             _isPlaying = false;
-            nowPlaying = null;
+            _nowPlaying = null;
             _ = CheckAndPlayNext();
         }
 
