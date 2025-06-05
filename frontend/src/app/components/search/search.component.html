@@ -1,10 +1,6 @@
 <main class="jukebox-container">
 
-  <h2>🎶 Jukebox Queue</h2>
 
-  <div class="jukebox-controls">
-    <button (click)="skip()">⏭️ Skip</button>
-  </div>
 
   <div class="queue-section">
     <h3>Now Playing</h3>
@@ -13,6 +9,12 @@
       <img [src]="nowPlaying.thumbnail" alt="Cover" class="thumbnail" />
       <div class="song-info">
         <div class="song-title">{{ nowPlaying.title }}</div>
+      </div>
+      <div class="song-actions">
+        <button [disabled]="isSkipping" (click)="skip()">
+          <span *ngIf="isSkipping" class="spinner"></span>
+          <span *ngIf="!isSkipping">Skip</span>
+        </button>
       </div>
     </div>
   </div>

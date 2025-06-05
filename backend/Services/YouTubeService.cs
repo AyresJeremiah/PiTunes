@@ -49,9 +49,10 @@ namespace backend.Services
                 throw new Exception($"YouTubeItem with ID {videoId} not found.");
             }
             
-            if (_incomingQueue.Any(x => x.Id == item.Id))
+            if (_incomingQueue.Any(x => x.Id == item.Id) || _queue.Any(x => x.Id == item.Id))
             {
-                return; 
+                Console.WriteLine($"Item {item.Id} is already in the queue.");
+                return;
             }
             _ = queueItemResult.AddAsync(new QueueItem(item.Id));
             _incomingQueue.Enqueue(item);

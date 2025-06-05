@@ -19,6 +19,7 @@ export class SearchComponent implements OnInit, OnDestroy {
   nowPlaying: YouTubeItem | null = null;
   isQueueing: { [id: string]: boolean } = {};
   isSearching: boolean = false;
+  isSkipping: boolean = false;
 
   constructor(
     private songService: SongService,
@@ -61,7 +62,9 @@ export class SearchComponent implements OnInit, OnDestroy {
   }
 
   skip(): void {
+    this.isSkipping = true;
     this.songService.skip().subscribe(() => {
+      this.isSkipping = false;
     });
   }
 
