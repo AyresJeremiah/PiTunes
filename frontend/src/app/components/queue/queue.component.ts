@@ -1,9 +1,10 @@
-import {Component, OnInit, OnDestroy} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {YouTubeItem} from 'app/models/song.model';
-import {SocketService} from 'app/services/socket.service';
-import {SongService} from 'src/app/services/song.service';
+import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformServer } from '@angular/common';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { YouTubeItem } from 'app/models/song.model';
+import { SocketService } from 'app/services/socket.service';
+import { SongService } from 'src/app/services/song.service';
 
 @Component({
   selector: 'app-queue',
@@ -15,22 +16,28 @@ import {SongService} from 'src/app/services/song.service';
 export class QueueComponent implements OnInit, OnDestroy {
   queue: YouTubeItem[] = [];
 
-  constructor(private socketService: SocketService, private songService: SongService) {
-  }
+  constructor(
+    private socketService: SocketService,
+    private songService: SongService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
   getQueue(): void {
     this.songService.getQueue()
-      .subscribe((items: YouTubeItem[]) => {this.queue = items;});
+      .subscribe((items: YouTubeItem[]) => { this.queue = items; });
   }
 
   ngOnInit(): void {
-    // Subscribe to ReceiveQueue event
-    this.socketService.onReceiveQueue((items: YouTubeItem[]) => {
-      this.queue = items;
-    });
-    this.getQueue();
+    if (!isPlatformServer(this.platformId)) {
+      this.socketService.onReceiveQueue((items: YouTubeItem[]) => {
+        this.queue = items;
+      });
+
+      this.getQueue();
+    }
   }
 
   ngOnDestroy(): void {
+    // no-op for now
   }
 }

@@ -1,45 +1,53 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformServer } from '@angular/common';
 import * as signalR from '@microsoft/signalr';
-import {YouTubeItem} from 'src/app/models/song.model';
+import { YouTubeItem } from 'src/app/models/song.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SocketService {
 
-  private hubConnection: signalR.HubConnection;
+  private hubConnection: signalR.HubConnection | null = null;
 
-  constructor() {
-    this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:4200/api/hubs/socket")
-      .withAutomaticReconnect()
-      .build();
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+    // DO NOT initialize hubConnection in constructor to prevent SSR errors.
   }
 
   public start(): void {
+    if (isPlatformServer(this.platformId)) {
+      console.log("Skipping SignalR connection during SSR");
+      return;
+    }
+
+    this.hubConnection = new signalR.HubConnectionBuilder()
+      .withUrl("/api/hubs/socket")  // <-- relative URL works inside nginx container
+      .withAutomaticReconnect()
+      .build();
+
     this.hubConnection
       .start()
       .then(() => console.log('SignalR connected'))
       .catch(err => console.error('Error connecting to SignalR: ', err));
   }
 
-  // Listen for full queue updates
   public onReceiveQueue(callback: (items: YouTubeItem[]) => void): void {
-    this.hubConnection.on("ReceiveQueue", (items: YouTubeItem[]) => {
-      callback(items);
-    });
+    if (this.hubConnection) {
+      this.hubConnection.on("ReceiveQueue", callback);
+    }
   }
 
-  // Listen for NowPlaying updates
   public onReceiveNowPlaying(callback: (item: YouTubeItem) => void): void {
-    this.hubConnection.on("ReceiveNowPlaying", (item: YouTubeItem) => {
-      callback(item);
-    });
+    if (this.hubConnection) {
+      this.hubConnection.on("ReceiveNowPlaying", callback);
+    }
   }
 
   public stop(): void {
-    this.hubConnection.stop()
-      .then(() => console.log("SignalR disconnected"))
-      .catch(err => console.error("Error disconnecting: ", err));
+    if (this.hubConnection) {
+      this.hubConnection.stop()
+        .then(() => console.log("SignalR disconnected"))
+        .catch(err => console.error("Error disconnecting: ", err));
+    }
   }
 }

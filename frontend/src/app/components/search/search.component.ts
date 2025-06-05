@@ -1,10 +1,11 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {SongService} from 'app/services/song.service';
-import {YouTubeItem} from 'app/models/song.model';
-import {ToastService} from 'app/services/toast.service';
-import {SocketService} from 'src/app/services/socket.service';
+import { Component, OnDestroy, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformServer } from '@angular/common';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { SongService } from 'app/services/song.service';
+import { YouTubeItem } from 'app/models/song.model';
+import { ToastService } from 'app/services/toast.service';
+import { SocketService } from 'src/app/services/socket.service';
 
 @Component({
   selector: 'app-search',
@@ -24,9 +25,9 @@ export class SearchComponent implements OnInit, OnDestroy {
   constructor(
     private songService: SongService,
     private toastService: ToastService,
-    private socketService: SocketService
-  ) {
-  }
+    private socketService: SocketService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
   search(): void {
     this.isSearching = true;
@@ -58,7 +59,7 @@ export class SearchComponent implements OnInit, OnDestroy {
 
   getNowPlaying(): void {
     this.songService.getNowPlaying()
-      .subscribe((item: YouTubeItem) => {this.nowPlaying = item;});
+      .subscribe((item: YouTubeItem) => { this.nowPlaying = item; });
   }
 
   skip(): void {
@@ -69,13 +70,16 @@ export class SearchComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Subscribe to ReceiveNowPlaying event
-    this.socketService.onReceiveNowPlaying((item: YouTubeItem) => {
-      this.nowPlaying = item;
-    });
-    this.getNowPlaying();
+    if (!isPlatformServer(this.platformId)) {
+      this.socketService.onReceiveNowPlaying((item: YouTubeItem) => {
+        this.nowPlaying = item;
+      });
+
+      this.getNowPlaying();
+    }
   }
 
   ngOnDestroy(): void {
+    // cleanup if needed
   }
 }
