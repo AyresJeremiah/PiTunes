@@ -1,3 +1,4 @@
+using backend.hubs;
 using backend.Services;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
@@ -28,12 +29,14 @@ builder.Services.AddScoped<YouTubeItemResult>();
 builder.Services.AddScoped<IQueueItemResult, QueueItemResult>();
 builder.Services.AddSingleton<YouTubeService>();
 
-
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
+
+app.MapHub<SocketHub>("api/hubs/socket");
 
 if (app.Environment.IsDevelopment())
 {
@@ -43,24 +46,22 @@ if (app.Environment.IsDevelopment())
 else
 {
 // Run migrations automatically on startup
-    using (var scope = app.Services.CreateScope())
-    {
-        var db = scope.ServiceProvider.GetRequiredService<PiTunesDbContext>();
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<PiTunesDbContext>();
 
-        var retryCount = 5;
-        while (retryCount > 0)
+    var retryCount = 5;
+    while (retryCount > 0)
+    {
+        try
         {
-            try
-            {
-                db.Database.Migrate();
-                break;
-            }
-            catch (Exception ex)
-            {
-                retryCount--;
-                Console.WriteLine($"Database migration failed: {ex.Message}. Retrying...");
-                Thread.Sleep(2000);
-            }
+            db.Database.Migrate();
+            break;
+        }
+        catch (Exception ex)
+        {
+            retryCount--;
+            Console.WriteLine($"Database migration failed: {ex.Message}. Retrying...");
+            Thread.Sleep(2000);
         }
     }
 }

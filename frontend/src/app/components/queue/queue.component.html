@@ -1,7 +1,4 @@
 <div class="queue-section">
-  <div class="jukebox-controls">
-    <button (click)="refreshQueue()">🔄 Refresh</button>
-  </div>
   <div *ngIf="queue.length === 0" class="queue-empty">Queue is empty</div>
   <div *ngFor="let song of queue" class="queue-item horizontal-card">
     <img [src]="song.thumbnail" alt="Cover" class="thumbnail" />

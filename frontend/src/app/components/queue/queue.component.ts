@@ -1,8 +1,8 @@
-import {Component} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {SongService} from '../../services/song.service';
-import {YouTubeItem} from '../../models/song.model';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { YouTubeItem } from '../../models/song.model';
+import { SocketService } from '../../services/socket.service';
 
 @Component({
   selector: 'app-queue',
@@ -11,25 +11,21 @@ import {YouTubeItem} from '../../models/song.model';
   templateUrl: './queue.component.html',
   styleUrls: ['./queue.component.scss']
 })
-export class QueueComponent {
+export class QueueComponent implements OnInit, OnDestroy {
   queue: YouTubeItem[] = [];
-  poolingStarted: boolean = false;
 
-  constructor(private songService: SongService) {
-  }
+  constructor(private socketService: SocketService) {}
 
-  refreshQueue(): void {
-    this.songService.getQueue().subscribe(res => {
-      this.queue = res;
+  ngOnInit(): void {
+    // Subscribe to ReceiveQueue event
+    this.socketService.onReceiveQueue((items: YouTubeItem[]) => {
+      this.queue = items;
     });
-    this.setPooling();
-  }
-  setPooling(): void {
-    if(!this.poolingStarted) {
-      this.poolingStarted = true;
-      setInterval(() => this.refreshQueue(), 5000);
-    }
   }
 
-
+  ngOnDestroy(): void {
+    // Optional: If you're shutting down app-level socket on component destroy
+    // In most apps you actually leave socketService running globally
+    // this.socketService.stop();
+  }
 }
