@@ -4,7 +4,7 @@
 
   <div class="jukebox-controls">
     <button (click)="skip()">⏭️ Skip</button>
-    <button (click)="refreshQueue()">🔄 Refresh</button>
+    <button (click)="refreshNowPlaying()">🔄 Refresh</button>
   </div>
 
   <div class="queue-section">
@@ -14,17 +14,6 @@
       <img [src]="nowPlaying.thumbnail" alt="Cover" class="thumbnail" />
       <div class="song-info">
         <div class="song-title">{{ nowPlaying.title }}</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="queue-section">
-    <h3>Queued Songs</h3>
-    <div *ngIf="queue.length === 0" class="queue-empty">Queue is empty</div>
-    <div *ngFor="let song of queue" class="queue-item horizontal-card">
-      <img [src]="song.thumbnail" alt="Cover" class="thumbnail" />
-      <div class="song-info">
-        <div class="song-title">{{ song.title }}</div>
       </div>
     </div>
   </div>

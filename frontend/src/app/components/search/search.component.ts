@@ -7,15 +7,14 @@ import { ToastService } from 'app/services/toast.service';
 
 @Component({
   selector: 'app-search',
-  standalone: true,  // <-- you're using standalone components
-  imports: [CommonModule, FormsModule],  // <-- add FormsModule here
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './search.component.html',
   styleUrls: ['./search.component.scss']
 })
 export class SearchComponent {
   query: string = '';
   results: YouTubeSearchResult[] = [];
-  queue: YouTubeSearchResult[] = [];
   nowPlaying: YouTubeSearchResult | null = null;
   poolingStarted: boolean = false;
   isQueueing: { [id: string]: boolean } = {};
@@ -51,31 +50,22 @@ export class SearchComponent {
     });
   }
 
-  refreshQueue(): void {
-    this.setPooling();
-    this.refreshNowPlaying();
-    this.songService.getQueue().subscribe(res => {
-      this.queue = res;
-    });
-  }
-
   refreshNowPlaying(): void {
     this.songService.getNowPlaying().subscribe(res => {
       this.nowPlaying = res;
     });
+    this.setPooling();
   }
 
   skip(): void {
     this.songService.skip().subscribe(() => {
-      console.log("Song skipped");
-      this.refreshQueue();
+      // console.log("Song skipped");
     });
   }
 
   setPooling(): void {
     if(!this.poolingStarted) {
       this.poolingStarted = true;
-      setInterval(() => this.refreshQueue(), 5000);
       setInterval(() => this.refreshNowPlaying(), 5000);
     }
   }

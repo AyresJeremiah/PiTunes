@@ -15,11 +15,11 @@ services:
       - "5219:80"
     depends_on:
       - frontend
-      - postgres  # <-- add postgres dependency here
+      - postgres
     networks:
       - PiTunes-net
-    devices:
-      - /dev/snd
+#    devices:
+#      - /dev/snd
 
   frontend:
     build: ./frontend
