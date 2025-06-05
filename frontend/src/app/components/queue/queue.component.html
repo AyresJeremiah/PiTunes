@@ -1,4 +1,5 @@
 <div class="queue-section">
+  <h2>Queue</h2>
   <div *ngIf="queue.length === 0" class="queue-empty">Queue is empty</div>
   <div *ngFor="let song of queue" class="queue-item horizontal-card">
     <img [src]="song.thumbnail" alt="Cover" class="thumbnail" />
