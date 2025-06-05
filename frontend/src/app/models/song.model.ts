@@ -1,4 +1,4 @@
-export interface YouTubeSearchResult {
+export interface YouTubeItem {
   id: string;
   title: string;
   url: string;

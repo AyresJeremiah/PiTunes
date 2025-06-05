@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SongService } from '../../services/song.service';
-import { YouTubeSearchResult } from '../../models/song.model';
+import { YouTubeItem } from '../../models/song.model';
 import { ToastService } from 'app/services/toast.service';
 
 @Component({
@@ -14,8 +14,8 @@ import { ToastService } from 'app/services/toast.service';
 })
 export class SearchComponent {
   query: string = '';
-  results: YouTubeSearchResult[] = [];
-  nowPlaying: YouTubeSearchResult | null = null;
+  results: YouTubeItem[] = [];
+  nowPlaying: YouTubeItem | null = null;
   poolingStarted: boolean = false;
   isQueueing: { [id: string]: boolean } = {};
   isSearching: boolean = false;
@@ -35,7 +35,7 @@ export class SearchComponent {
       }
     });
   }
-  queueSong(song: YouTubeSearchResult): void {
+  queueSong(song: YouTubeItem): void {
     this.isQueueing[song.id] = true;
     this.songService.queue(song).subscribe({
       next: () => {
