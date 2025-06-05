@@ -35,7 +35,7 @@ This project is a full-stack, self-hosted, YouTube-powered jukebox system, desig
 1. **Clone this repo to your Raspberry Pi**
 
 ```bash
-git clone https://your-repo-url.git
+git clone git@github.com:AyresJeremiah/PiTunes.git
 cd PiTunes
 ```
 
