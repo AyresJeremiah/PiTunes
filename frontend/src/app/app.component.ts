@@ -30,7 +30,4 @@ export class AppComponent implements OnInit {
     this.socketService.start();
   }
 
-  ngOnDestroy(): void {
-    this.socketService.stop();
-  }
 }

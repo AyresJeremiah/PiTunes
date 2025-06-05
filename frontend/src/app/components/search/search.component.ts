@@ -55,6 +55,11 @@ export class SearchComponent implements OnInit, OnDestroy {
     });
   }
 
+  getNowPlaying(): void {
+    this.songService.getNowPlaying()
+      .subscribe((item: YouTubeItem) => {this.nowPlaying = item;});
+  }
+
   skip(): void {
     this.songService.skip().subscribe(() => {
     });
@@ -65,6 +70,7 @@ export class SearchComponent implements OnInit, OnDestroy {
     this.socketService.onReceiveNowPlaying((item: YouTubeItem) => {
       this.nowPlaying = item;
     });
+    this.getNowPlaying();
   }
 
   ngOnDestroy(): void {

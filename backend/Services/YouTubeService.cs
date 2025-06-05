@@ -29,7 +29,7 @@ namespace backend.Services
 
         private Process? _ffplayProcess;
         private bool _isPlaying = false;
-        private YouTubeItem? nowPlaying;
+        private YouTubeItem? _nowPlaying;
 
         public YouTubeService(IServiceScopeFactory scopeFactory, IHubContext<SocketHub> hubContext)
         {
@@ -61,7 +61,7 @@ namespace backend.Services
 
         public Queue<YouTubeItem> GetQueue() => new Queue<YouTubeItem>(_queue);
 
-        public YouTubeItem? GetNowPlaying() => nowPlaying;
+        public YouTubeItem? GetNowPlaying() => _nowPlaying;
 
         public void Skip()
         {
@@ -175,13 +175,12 @@ namespace backend.Services
         
         private async Task SendQueueUpdateAsync()
         {
-            var queueArray = _queue.ToArray();
-            await _hubContext.Clients.All.SendAsync("ReceiveQueue", queueArray);
+            await _hubContext.Clients.All.SendAsync("ReceiveQueue", _queue.ToArray());
         }
         
         private async Task SendNowPlayingUpdateAsync()
         {
-            await _hubContext.Clients.All.SendAsync("ReceiveNowPlaying", nowPlaying);
+            await _hubContext.Clients.All.SendAsync("ReceiveNowPlaying", _nowPlaying);
         }
 
         private async Task CheckAndPlayNext()
@@ -238,7 +237,7 @@ namespace backend.Services
             if (_isPlaying) return;
 
             _isPlaying = true;
-            nowPlaying = item;
+            _nowPlaying = item;
             await this.SendNowPlayingUpdateAsync();
 
             var filePath = await DownloadAndCacheAsync(item.Id);
@@ -269,7 +268,7 @@ namespace backend.Services
         private void OnProcessExited(object? sender, EventArgs e)
         {
             _isPlaying = false;
-            nowPlaying = null;
+            _nowPlaying = null;
             _ = CheckAndPlayNext();
         }
 
