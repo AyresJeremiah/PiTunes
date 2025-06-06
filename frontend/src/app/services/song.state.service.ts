@@ -54,6 +54,11 @@ export class SongStateService {
     this.socketService.onReceiveNowPlaying((item: YouTubeItem) => {
       this.nowPlayingSubject.next(item);
     });
+
+    this.socketService.onReceiveDownloadedSong((item: YouTubeItem) => {
+      this.songsSubject.value.push(item);
+      this.songsSubject.next(this.songsSubject.value);
+    });
   }
 
   // Optional manual refresh if needed

@@ -50,6 +50,12 @@ export class SocketService {
     }
   }
 
+  public onReceiveDownloadedSong(callback: (item: YouTubeItem) => void): void {
+    if (this.hubConnection) {
+      this.hubConnection.on("ReceiveDownloadedSong", callback);
+    }
+  }
+
   public onReceiveNowPlaying(callback: (item: YouTubeItem) => void): void {
     if (this.hubConnection) {
       this.hubConnection.on("ReceiveNowPlaying", callback);
@@ -72,4 +78,6 @@ export class SocketService {
         .catch(err => console.error('Error reconnecting after wakeup:', err));
     }
   }
+
+
 }
