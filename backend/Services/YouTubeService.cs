@@ -164,6 +164,7 @@ namespace backend.Services
                         _queue.Enqueue(item);
                         await this.SendQueueUpdateAsync();
                         await this.SendDownloadQueueUpdateAsync();
+                        await this.SendDownloadedSong(item);
                         await CheckAndPlayNext();
                     }
                     catch (Exception ex)
@@ -350,6 +351,11 @@ namespace backend.Services
         private async Task SendDownloadQueueUpdateAsync()
         {
             await _hubContext.Clients.All.SendAsync("ReceiveDownloadQueue", _incomingQueue.ToArray());
+        }
+        
+        private async Task SendDownloadedSong(YouTubeItem item)
+        {
+            await _hubContext.Clients.All.SendAsync("ReceiveDownloadedSong", item);
         }
     }
 }
