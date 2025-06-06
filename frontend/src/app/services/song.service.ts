@@ -21,6 +21,10 @@ export class SongService {
     return this.http.get<YouTubeItem[]>('/api/songs/queue');
   }
 
+  getDownloadQueue() {
+    return this.http.get<YouTubeItem[]>('/api/songs/download-queue');
+  }
+
   getNowPlaying() {
     return this.http.get<YouTubeItem>('/api/songs/now-playing');
   }

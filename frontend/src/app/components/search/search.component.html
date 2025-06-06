@@ -1,26 +1,29 @@
 <main class="jukebox-container">
 
-
-
   <div class="queue-section">
     <h3>Now Playing</h3>
     <div *ngIf="!nowPlaying" class="queue-empty">Nothing is playing</div>
     <div *ngIf="nowPlaying" class="queue-item horizontal-card">
-      <img [src]="nowPlaying.thumbnail" alt="Cover" class="thumbnail" />
+      <img [src]="nowPlaying.thumbnail" alt="Cover" class="thumbnail"/>
       <div class="song-info">
         <div class="song-title">{{ nowPlaying.title }}</div>
       </div>
+
       <div class="song-actions">
         <button [disabled]="isSkipping" (click)="skip()">
           <span *ngIf="isSkipping" class="spinner"></span>
-          <span *ngIf="!isSkipping">Skip</span>
+          <span *ngIf="!isSkipping">
+            <i class="fas fa-forward"></i>
+          </span>
         </button>
       </div>
+
+
     </div>
   </div>
 
   <div class="search-bar">
-    <input [(ngModel)]="query" placeholder="Search YouTube..." />
+    <input [(ngModel)]="query" placeholder="Search YouTube..."/>
     <button (click)="search()" [disabled]="isSearching">
       <span *ngIf="isSearching" class="spinner"></span>
       <span *ngIf="!isSearching">Search</span>
@@ -33,14 +36,29 @@
       <div class="song-info">
         <div class="song-title">{{ song.title }}</div>
         <div class="song-actions">
-          <a class="song-link" href="{{ song.url }}" target="_blank">Open</a>
-          <button [disabled]="isQueueing[song.id]" (click)="queueSong(song)">
-            <span *ngIf="isQueueing[song.id]" class="spinner"></span>
-            <span *ngIf="!isQueueing[song.id]">Queue</span>
-          </button>
+          <a class="song-link" href="{{ song.url }}" target="_blank">
+            <i class="fas fa-external-link-alt"></i>
+          </a>
+
+          <ng-container *ngIf="!isQueued[song.id]; else queued">
+            <button [disabled]="isQueueing[song.id]" (click)="queueSong(song)">
+              <span *ngIf="isQueueing[song.id]" class="spinner"></span>
+              <span *ngIf="!isQueueing[song.id]">
+              <i class="fas fa-plus"></i>
+            </span>
+            </button>
+          </ng-container>
+
+          <ng-template #queued>
+          <span class="queued-label">
+            <i class="fas fa-check"></i> In Queue
+          </span>
+          </ng-template>
+
         </div>
       </div>
     </div>
   </div>
+
 
 </main>

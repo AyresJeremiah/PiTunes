@@ -8,5 +8,8 @@
 
 <!-- Drawer content -->
 <div class="drawer" [class.open]="isOpen">
-  <ng-content></ng-content>
+  <!-- New scrollable inner content -->
+  <div class="drawer-content">
+    <ng-content></ng-content>
+  </div>
 </div>

@@ -14,5 +14,10 @@ namespace backend.hubs
         {
             await Clients.All.SendAsync("ReceiveNowPlaying", item);
         }
+        
+        public async Task SendDownloadQueue(YouTubeItem[] items)
+        {
+            await Clients.All.SendAsync("ReceiveDownloadQueue", items);
+        }
     }
 }
