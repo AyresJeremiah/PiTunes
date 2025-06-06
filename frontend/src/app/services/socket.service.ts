@@ -22,7 +22,7 @@ export class SocketService {
     }
 
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl(`${environment.apiBaseUrl}/api/hubs/socket`)
+      .withUrl(`/api/hubs/socket`)
       .withAutomaticReconnect()
       .build();
 
