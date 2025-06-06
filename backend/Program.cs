@@ -15,11 +15,18 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", builder =>
     {
-        builder.WithOrigins("https://localhost:4200")
+        builder
+            .WithOrigins(
+                "http://localhost:4200", 
+                "https://localhost:4200", 
+                "http://frontend"
+            )
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
+
 
 // Add DbContext with Postgres
 builder.Services.AddDbContext<PiTunesDbContext>(options =>

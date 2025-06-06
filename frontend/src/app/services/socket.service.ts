@@ -2,6 +2,7 @@ import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformServer } from '@angular/common';
 import * as signalR from '@microsoft/signalr';
 import { YouTubeItem } from 'src/app/models/song.model';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +22,7 @@ export class SocketService {
     }
 
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl("/api/hubs/socket")
+      .withUrl(`${environment.apiBaseUrl}/api/hubs/socket`)
       .withAutomaticReconnect()
       .build();
 
