@@ -3,8 +3,8 @@ import { isPlatformServer } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { YouTubeItem } from 'app/models/song.model';
-import { SocketService } from 'app/services/socket.service';
 import { SongService } from 'src/app/services/song.service';
+import {SongStateService} from 'src/app/services/song.state.service';
 
 @Component({
   selector: 'app-queue',
@@ -18,31 +18,22 @@ export class QueueComponent implements OnInit, OnDestroy {
   downloadQueue: YouTubeItem[] = [];
 
   constructor(
-    private socketService: SocketService,
     private songService: SongService,
+    private songState: SongStateService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
-  getQueue(): void {
-    this.songService.getQueue()
-      .subscribe((items: YouTubeItem[]) => { this.queue = items; });
-  }
-
   ngOnInit(): void {
     if (!isPlatformServer(this.platformId)) {
-      this.socketService.onReceiveQueue((items: YouTubeItem[]) => {
+      this.songState.queue$.subscribe(items => {
         this.queue = items;
       });
 
-      this.socketService.onReceiveDownloadQueue((items: YouTubeItem[]) => {
+      this.songState.downloadQueue$.subscribe(items => {
         this.downloadQueue = items;
       });
-
-      this.getQueue();
     }
   }
 
-  ngOnDestroy(): void {
-    // no-op for now
-  }
+  ngOnDestroy(): void {}
 }

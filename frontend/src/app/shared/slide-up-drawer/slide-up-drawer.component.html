@@ -1,15 +1,4 @@
-<!-- Drawer handle button -->
-<button class="drawer-toggle-button" (click)="toggle()">
-  <span class="arrow" [class.open]="isOpen">▲</span>
-</button>
 
-<!-- Backdrop -->
-<div class="backdrop" *ngIf="isOpen" (click)="close()"></div>
-
-<!-- Drawer content -->
 <div class="drawer" [class.open]="isOpen">
-  <!-- New scrollable inner content -->
-  <div class="drawer-content">
-    <ng-content></ng-content>
-  </div>
+  <ng-content></ng-content>
 </div>

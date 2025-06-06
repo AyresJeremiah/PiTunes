@@ -1,41 +1,39 @@
 import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformServer, CommonModule } from '@angular/common';
+import { isPlatformServer } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SongService } from 'app/services/song.service';
-import { ToastService } from 'app/services/toast.service';
 import { YouTubeItem } from 'app/models/song.model';
+import { SongService } from 'src/app/services/song.service';
+import { ToastService } from 'src/app/services/toast.service';
 import {SongStateService} from 'src/app/services/song.state.service';
 
 @Component({
-  selector: 'app-search',
+  selector: 'app-song-management',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './search.component.html',
-  styleUrls: ['./search.component.scss']
+  templateUrl: './song-management.component.html',
+  styleUrls: ['./song-management.component.scss']
 })
-export class SearchComponent implements OnInit, OnDestroy {
-  query: string = '';
-  results: YouTubeItem[] = [];
-  nowPlaying: YouTubeItem | null = null;
-  isQueueing: { [id: string]: boolean } = {};
-  isQueued: { [id: string]: boolean } = {};
-  isSearching: boolean = false;
-  isSkipping: boolean = false;
+export class SongManagementComponent implements OnInit, OnDestroy {
+  songs: YouTubeItem[] = [];
   downloadQueue: YouTubeItem[] = [];
   queue: YouTubeItem[] = [];
+  isQueueing: { [id: string]: boolean } = {};
+  isQueued: { [id: string]: boolean } = {};
+  nowPlaying: YouTubeItem | null = null;
 
   constructor(
-    private songService: SongService,
     private toastService: ToastService,
+    private songService: SongService,
     private songState: SongStateService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit(): void {
     if (!isPlatformServer(this.platformId)) {
-      // Subscribing to centralized state service
       this.songState.nowPlaying$.subscribe(item => {
         this.nowPlaying = item;
+        this.processQueue();
       });
 
       this.songState.queue$.subscribe(items => {
@@ -47,20 +45,22 @@ export class SearchComponent implements OnInit, OnDestroy {
         this.downloadQueue = items;
         this.processQueue();
       });
+
+      this.songState.songs$.subscribe(items => {
+        this.songs = items;
+      });
     }
   }
 
-  search(): void {
-    this.isSearching = true;
-    this.songService.search(this.query).subscribe({
-      next: res => {
-        this.results = res;
-        this.isSearching = false;
-      },
-      error: () => {
-        this.isSearching = false;
-      }
-    });
+  processQueue(): void {
+    this.isQueued = Object.fromEntries(
+      [...this.queue, ...this.downloadQueue].map(
+        (song: YouTubeItem) => [song.id, true]
+      )
+    );
+    if (this.nowPlaying !== null) {
+      this.isQueued[this.nowPlaying.id] = true;
+    }
   }
 
   queueSong(song: YouTubeItem): void {
@@ -76,21 +76,6 @@ export class SearchComponent implements OnInit, OnDestroy {
       complete: () => {
         this.isQueueing[song.id] = false;
       }
-    });
-  }
-
-  processQueue(): void {
-    this.isQueued = Object.fromEntries(
-      [...this.queue, ...this.downloadQueue].map(
-        (song: YouTubeItem) => [song.id, true]
-      )
-    );
-  }
-
-  skip(): void {
-    this.isSkipping = true;
-    this.songService.skip().subscribe(() => {
-      this.isSkipping = false;
     });
   }
 
