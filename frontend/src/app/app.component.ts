@@ -8,6 +8,8 @@ import {HttpClientModule} from '@angular/common/http';
 import {SlideUpDrawerComponent} from 'src/app/shared/slide-up-drawer/slide-up-drawer.component';
 import {QueueComponent} from 'src/app/components/queue/queue.component';
 import {SocketService} from './services/socket.service';
+import {BottomTrayComponent} from 'src/app/components/bottom-tray/bottom-tray.component';
+import {SongManagementComponent} from 'src/app/components/song-management/song-management.component';
 
 @Component({
   selector: 'app-root',
@@ -18,7 +20,10 @@ import {SocketService} from './services/socket.service';
     FormsModule,
     HttpClientModule,
     SlideUpDrawerComponent,
-    QueueComponent
+    QueueComponent,
+    BottomTrayComponent,
+    BottomTrayComponent,
+    SongManagementComponent
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
