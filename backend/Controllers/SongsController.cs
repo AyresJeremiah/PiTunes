@@ -42,6 +42,24 @@ namespace backend.Controllers
             return Ok(queue);
         }
         
+        [HttpGet("downloaded")]
+        public async Task<IActionResult> GetDownloadedSongs()
+        {
+            // Get list of downloaded song IDs
+            var downloadedSongs = YouTubeService.GetListOfCachedSongs();
+
+            // Query the database to get all YouTubeItems
+            var dataBaseItems = await _youTubeItemResult.GetAllAsync();
+
+            // Filter database items where ID matches downloaded songs
+            var downloadedItems = dataBaseItems
+                .Where(item => downloadedSongs.Contains(item.Id))
+                .ToList();
+
+            return Ok(downloadedItems);
+        }
+
+        
         [HttpGet("download-queue")]
         public IActionResult GetDownloadQueue()
         {

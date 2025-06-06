@@ -20,6 +20,7 @@ export class SongManagementComponent implements OnInit, OnDestroy {
   queue: YouTubeItem[] = [];
   isQueueing: { [id: string]: boolean } = {};
   isQueued: { [id: string]: boolean } = {};
+  nowPlaying: YouTubeItem | null = null;
 
   constructor(
     private socketService: SocketService,
@@ -34,6 +35,34 @@ export class SongManagementComponent implements OnInit, OnDestroy {
       .subscribe((items: YouTubeItem[]) => {
         this.songs = items;
       });
+  }
+
+  getData(): void {
+    this.songService.getNowPlaying()
+      .subscribe((item: YouTubeItem) => {
+        this.nowPlaying = item;
+      });
+    this.songService.getQueue()
+      .subscribe((items: YouTubeItem[]) => {
+        this.queue = items;
+        this.processQueue();
+      });
+    this.songService.getDownloadQueue()
+      .subscribe((items: YouTubeItem[]) => {
+        this.downloadQueue = items;
+        this.processQueue();
+      });
+  }
+
+  processQueue(): void {
+    this.isQueued = Object.fromEntries(
+      [...this.queue, ...this.downloadQueue].map(
+        (song: YouTubeItem) => [song.id, true]
+      )
+    );
+    if(this.nowPlaying !== null) {
+      this.isQueued[this.nowPlaying.id] = true;
+    }
   }
 
   queueSong(song: YouTubeItem): void {
@@ -56,12 +85,15 @@ export class SongManagementComponent implements OnInit, OnDestroy {
     this.socketService.onReceiveQueue((items: YouTubeItem[]) => {
       this.queue = items;
     });
-
     this.socketService.onReceiveDownloadQueue((items: YouTubeItem[]) => {
       this.downloadQueue = items;
     });
+    this.socketService.onReceiveNowPlaying((item: YouTubeItem) => {
+      this.nowPlaying = item;
+    });
 
     this.getSongs();
+    this.getData();
   }
 
   ngOnDestroy(): void {

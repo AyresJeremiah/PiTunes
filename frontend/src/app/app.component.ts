@@ -10,6 +10,7 @@ import {QueueComponent} from 'src/app/components/queue/queue.component';
 import {SocketService} from './services/socket.service';
 import {BottomTrayComponent} from 'src/app/components/bottom-tray/bottom-tray.component';
 import {SongManagementComponent} from 'src/app/components/song-management/song-management.component';
+import {SongStateService} from 'src/app/services/song.state.service';
 
 @Component({
   selector: 'app-root',
@@ -33,6 +34,7 @@ export class AppComponent implements OnInit {
 
   constructor(
     private socketService: SocketService,
+    private songStateService: SongStateService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
   }
@@ -40,6 +42,7 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     if (!isPlatformServer(this.platformId)) {
       this.socketService.start();
+      this.songStateService.initialize();
     } else {
       console.log("Skipping SignalR connection during SSR prerender");
     }

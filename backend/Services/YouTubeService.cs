@@ -193,6 +193,23 @@ namespace backend.Services
             }
         }
 
+        public static IEnumerable<string> GetListOfCachedSongs()
+        {
+            var cacheDir = Path.Combine("song_cache");
+            if (!Directory.Exists(cacheDir))
+            {
+                Console.WriteLine("Cache directory does not exist.");
+                return [];
+            }
+
+            var files = Directory.GetFiles(cacheDir, "*.mp3");
+
+            return files
+                .Select(Path.GetFileNameWithoutExtension)
+                .OfType<string>() // this removes any nulls
+                .Where(x => x.Length > 0);
+        }
+        
         private async Task PlayRandom()
         {
             if (_isPlaying) return;
@@ -218,6 +235,8 @@ namespace backend.Services
 
             var searchResultService = scope.ServiceProvider.GetRequiredService<YouTubeItemResult>();
             var fileName = Path.GetFileNameWithoutExtension(randomFile);
+            
+            
             var item = await searchResultService.GetByIdAsync(fileName);
             if (item == null)
             {
