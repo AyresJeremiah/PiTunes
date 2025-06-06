@@ -33,4 +33,7 @@ export class SongService {
     return this.http.post('/api/songs/skip', {});
   }
 
+  getSongs() {
+    return this.http.get<YouTubeItem[]>('/api/songs/downloaded');
+  }
 }
