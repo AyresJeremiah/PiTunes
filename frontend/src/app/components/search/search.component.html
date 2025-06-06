@@ -23,12 +23,15 @@
   </div>
 
   <div class="search-bar">
-    <input [(ngModel)]="query" placeholder="Search YouTube..."/>
+    <input [(ngModel)]="query" placeholder="Search YouTube..." />
     <button (click)="search()" [disabled]="isSearching">
       <span *ngIf="isSearching" class="spinner"></span>
-      <span *ngIf="!isSearching">Search</span>
+      <span *ngIf="!isSearching">
+      <i class="fas fa-search"></i>
+    </span>
     </button>
   </div>
+
 
   <div class="song-grid">
     <div class="song-card horizontal-card" *ngFor="let song of results">
