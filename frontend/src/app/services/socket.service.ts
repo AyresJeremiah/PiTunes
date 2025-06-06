@@ -21,7 +21,7 @@ export class SocketService {
     }
 
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl("/api/hubs/socket")  // <-- relative URL works inside nginx container
+      .withUrl("/api/hubs/socket")
       .withAutomaticReconnect()
       .build();
 
@@ -29,11 +29,24 @@ export class SocketService {
       .start()
       .then(() => console.log('SignalR connected'))
       .catch(err => console.error('Error connecting to SignalR: ', err));
+
+    // Attach visibility change handler for mobile wake-up
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        this.reconnectIfNeeded();
+      }
+    });
   }
 
   public onReceiveQueue(callback: (items: YouTubeItem[]) => void): void {
     if (this.hubConnection) {
       this.hubConnection.on("ReceiveQueue", callback);
+    }
+  }
+
+  public onReceiveDownloadQueue(callback: (items: YouTubeItem[]) => void): void {
+    if (this.hubConnection) {
+      this.hubConnection.on("ReceiveDownloadQueue", callback);
     }
   }
 
@@ -43,11 +56,20 @@ export class SocketService {
     }
   }
 
-  public stop(): void {
-    if (this.hubConnection) {
-      this.hubConnection.stop()
-        .then(() => console.log("SignalR disconnected"))
-        .catch(err => console.error("Error disconnecting: ", err));
+  private reconnectIfNeeded(): void {
+    if (!this.hubConnection) {
+      return;
+    }
+
+    const state = this.hubConnection.state;
+
+    if (state === signalR.HubConnectionState.Disconnected) {
+      console.log("Attempting reconnect after wakeup...");
+
+      this.hubConnection
+        .start()
+        .then(() => console.log('SignalR reconnected after wakeup'))
+        .catch(err => console.error('Error reconnecting after wakeup:', err));
     }
   }
 }

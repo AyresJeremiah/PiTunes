@@ -7,4 +7,13 @@
       <div class="song-title">{{ song.title }}</div>
     </div>
   </div>
+
+
+  <div *ngIf="downloadQueue.length > 0"><h2>Downloading</h2></div>
+  <div *ngFor="let song of downloadQueue" class="queue-item horizontal-card">
+    <img [src]="song.thumbnail" alt="Cover" class="thumbnail" />
+    <div class="song-info">
+      <div class="song-title">{{ song.title }}</div>
+    </div>
+  </div>
 </div>

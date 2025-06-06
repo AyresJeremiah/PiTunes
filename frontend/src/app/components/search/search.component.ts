@@ -1,11 +1,11 @@
-import { Component, OnDestroy, OnInit, Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformServer } from '@angular/common';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { SongService } from 'app/services/song.service';
-import { YouTubeItem } from 'app/models/song.model';
-import { ToastService } from 'app/services/toast.service';
-import { SocketService } from 'src/app/services/socket.service';
+import {Component, OnDestroy, OnInit, Inject, PLATFORM_ID} from '@angular/core';
+import {isPlatformServer} from '@angular/common';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {SongService} from 'app/services/song.service';
+import {YouTubeItem} from 'app/models/song.model';
+import {ToastService} from 'app/services/toast.service';
+import {SocketService} from 'src/app/services/socket.service';
 
 @Component({
   selector: 'app-search',
@@ -19,15 +19,19 @@ export class SearchComponent implements OnInit, OnDestroy {
   results: YouTubeItem[] = [];
   nowPlaying: YouTubeItem | null = null;
   isQueueing: { [id: string]: boolean } = {};
+  isQueued: { [id: string]: boolean } = {};
   isSearching: boolean = false;
   isSkipping: boolean = false;
+  downloadQueue: YouTubeItem[] = [];
+  queue: YouTubeItem[] = [];
 
   constructor(
     private songService: SongService,
     private toastService: ToastService,
     private socketService: SocketService,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) {
+  }
 
   search(): void {
     this.isSearching = true;
@@ -50,6 +54,7 @@ export class SearchComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.toastService.show('Failed to queue song.');
+        this.isQueueing[song.id] = false;
       },
       complete: () => {
         this.isQueueing[song.id] = false;
@@ -57,9 +62,29 @@ export class SearchComponent implements OnInit, OnDestroy {
     });
   }
 
-  getNowPlaying(): void {
+  getData(): void {
     this.songService.getNowPlaying()
-      .subscribe((item: YouTubeItem) => { this.nowPlaying = item; });
+      .subscribe((item: YouTubeItem) => {
+        this.nowPlaying = item;
+      });
+    this.songService.getQueue()
+      .subscribe((items: YouTubeItem[]) => {
+        this.queue = items;
+        this.processQueue();
+      });
+    this.songService.getDownloadQueue()
+      .subscribe((items: YouTubeItem[]) => {
+        this.downloadQueue = items;
+        this.processQueue();
+      });
+  }
+
+  processQueue(): void {
+    this.isQueued = Object.fromEntries(
+      [...this.queue, ...this.downloadQueue].map(
+        (song: YouTubeItem) => [song.id, true]
+      )
+    );
   }
 
   skip(): void {
@@ -74,12 +99,18 @@ export class SearchComponent implements OnInit, OnDestroy {
       this.socketService.onReceiveNowPlaying((item: YouTubeItem) => {
         this.nowPlaying = item;
       });
-
-      this.getNowPlaying();
+      this.socketService.onReceiveQueue((items: YouTubeItem[]) => {
+        this.queue = items;
+        this.processQueue();
+      });
+      this.socketService.onReceiveDownloadQueue((items: YouTubeItem[]) => {
+        this.downloadQueue = items;
+        this.processQueue();
+      });
+      this.getData();
     }
   }
 
   ngOnDestroy(): void {
-    // cleanup if needed
   }
 }

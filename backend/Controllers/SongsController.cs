@@ -42,6 +42,13 @@ namespace backend.Controllers
             return Ok(queue);
         }
         
+        [HttpGet("download-queue")]
+        public IActionResult GetDownloadQueue()
+        {
+            var queue = _youtube.GetDownloadQueue();
+            return Ok(queue);
+        }
+        
         [HttpGet("now-playing")]
         public IActionResult GetNowPlaying()
         {

@@ -15,6 +15,7 @@ import { SongService } from 'src/app/services/song.service';
 })
 export class QueueComponent implements OnInit, OnDestroy {
   queue: YouTubeItem[] = [];
+  downloadQueue: YouTubeItem[] = [];
 
   constructor(
     private socketService: SocketService,
@@ -31,6 +32,10 @@ export class QueueComponent implements OnInit, OnDestroy {
     if (!isPlatformServer(this.platformId)) {
       this.socketService.onReceiveQueue((items: YouTubeItem[]) => {
         this.queue = items;
+      });
+
+      this.socketService.onReceiveDownloadQueue((items: YouTubeItem[]) => {
+        this.downloadQueue = items;
       });
 
       this.getQueue();

@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using backend.Models;
 using Microsoft.AspNetCore.SignalR;
@@ -25,7 +26,6 @@ namespace backend.Services
         private readonly SemaphoreSlim _queueSignal = new(0);
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IHubContext<SocketHub> _hubContext;
-
 
         private Process? _ffplayProcess;
         private bool _isPlaying = false;
@@ -61,8 +61,9 @@ namespace backend.Services
             _queueSignal.Release();
         }
 
-
         public Queue<YouTubeItem> GetQueue() => new Queue<YouTubeItem>(_queue);
+        
+        public Queue<YouTubeItem> GetDownloadQueue() => new Queue<YouTubeItem>(_incomingQueue);
 
         public YouTubeItem? GetNowPlaying() => _nowPlaying;
 
@@ -115,7 +116,6 @@ namespace backend.Services
             return results;
         }
 
-
         private async Task LoadQueueFromDbAsync()
         {
             using var scope = _scopeFactory.CreateScope();
@@ -150,21 +150,20 @@ namespace backend.Services
             await this.CheckAndPlayNext();
         }
 
-
-        // Private workers
-
         private async Task ProcessIncomingQueue()
         {
             while (!_cts.IsCancellationRequested)
             {
                 await _queueSignal.WaitAsync(_cts.Token);
+                await this.SendDownloadQueueUpdateAsync();
                 if (_incomingQueue.TryDequeue(out var item))
                 {
                     try
                     {
                         await DownloadAndCacheAsync(item.Id);
                         _queue.Enqueue(item);
-                        await SendQueueUpdateAsync();
+                        await this.SendQueueUpdateAsync();
+                        await this.SendDownloadQueueUpdateAsync();
                         await CheckAndPlayNext();
                     }
                     catch (Exception ex)
@@ -173,16 +172,6 @@ namespace backend.Services
                     }
                 }
             }
-        }
-
-        private async Task SendQueueUpdateAsync()
-        {
-            await _hubContext.Clients.All.SendAsync("ReceiveQueue", _queue.ToArray());
-        }
-
-        private async Task SendNowPlayingUpdateAsync()
-        {
-            await _hubContext.Clients.All.SendAsync("ReceiveNowPlaying", _nowPlaying);
         }
 
         private async Task CheckAndPlayNext()
@@ -200,11 +189,11 @@ namespace backend.Services
             }
             else
             {
-                this.PlayRandom();
+                _ = this.PlayRandom();
             }
         }
 
-        private async void PlayRandom()
+        private async Task PlayRandom()
         {
             if (_isPlaying) return;
 
@@ -248,7 +237,7 @@ namespace backend.Services
         private async Task PlayAsync(YouTubeItem item)
         {
             if (_isPlaying) return;
-
+            
             _isPlaying = true;
             _nowPlaying = item;
             await this.SendNowPlayingUpdateAsync();
@@ -285,7 +274,7 @@ namespace backend.Services
             _ = CheckAndPlayNext();
         }
 
-        private static async Task<string> DownloadAndCacheAsync(string videoId)
+        private async Task<string> DownloadAndCacheAsync(string videoId)
         {
             var outputPath = Path.Combine(CacheDir, $"{videoId}.mp3");
 
@@ -317,6 +306,31 @@ namespace backend.Services
 
             Console.WriteLine($"Downloaded and cached: {outputPath}");
             return outputPath;
+        }
+        
+        private async Task PlayFaker(YouTubeItem item)
+        {
+            this._nowPlaying = item;
+            await this.SendNowPlayingUpdateAsync();
+            Console.WriteLine($"[FAKE MODE] Pretending to play song: {item.Id}");
+            await Task.Delay(TimeSpan.FromSeconds(20));
+            OnProcessExited(null, EventArgs.Empty);
+        }
+
+        // SignalR methods
+        private async Task SendQueueUpdateAsync()
+        {
+            await _hubContext.Clients.All.SendAsync("ReceiveQueue", _queue.ToArray());
+        }
+
+        private async Task SendNowPlayingUpdateAsync()
+        {
+            await _hubContext.Clients.All.SendAsync("ReceiveNowPlaying", _nowPlaying);
+        }
+        
+        private async Task SendDownloadQueueUpdateAsync()
+        {
+            await _hubContext.Clients.All.SendAsync("ReceiveDownloadQueue", _incomingQueue.ToArray());
         }
     }
 }
