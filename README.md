@@ -1,5 +1,5 @@
 ![PiTunes Screenshot](frontend/public/assets/pitunes_icon_banner_ver2.png)
-# 🎶 Raspberry Pi Jukebox
+# PiTunes
 
 This project is a full-stack, self-hosted, YouTube-powered jukebox system, designed to be deployed on a Raspberry Pi or any Linux host.
 
