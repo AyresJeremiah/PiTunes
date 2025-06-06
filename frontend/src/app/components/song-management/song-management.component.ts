@@ -1,11 +1,11 @@
-import {Component, OnInit, OnDestroy, Inject, PLATFORM_ID} from '@angular/core';
-import {isPlatformServer} from '@angular/common';
-import {CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {YouTubeItem} from 'app/models/song.model';
-import {SocketService} from 'app/services/socket.service';
-import {SongService} from 'src/app/services/song.service';
-import {ToastService} from 'src/app/services/toast.service';
+import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformServer } from '@angular/common';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { YouTubeItem } from 'app/models/song.model';
+import { SongService } from 'src/app/services/song.service';
+import { ToastService } from 'src/app/services/toast.service';
+import {SongStateService} from 'src/app/services/song.state.service';
 
 @Component({
   selector: 'app-song-management',
@@ -23,35 +23,33 @@ export class SongManagementComponent implements OnInit, OnDestroy {
   nowPlaying: YouTubeItem | null = null;
 
   constructor(
-    private socketService: SocketService,
     private toastService: ToastService,
     private songService: SongService,
+    private songState: SongStateService,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {
-  }
+  ) {}
 
-  getSongs(): void {
-    this.songService.getSongs()
-      .subscribe((items: YouTubeItem[]) => {
-        this.songs = items;
-      });
-  }
-
-  getData(): void {
-    this.songService.getNowPlaying()
-      .subscribe((item: YouTubeItem) => {
+  ngOnInit(): void {
+    if (!isPlatformServer(this.platformId)) {
+      this.songState.nowPlaying$.subscribe(item => {
         this.nowPlaying = item;
+        this.processQueue();
       });
-    this.songService.getQueue()
-      .subscribe((items: YouTubeItem[]) => {
+
+      this.songState.queue$.subscribe(items => {
         this.queue = items;
         this.processQueue();
       });
-    this.songService.getDownloadQueue()
-      .subscribe((items: YouTubeItem[]) => {
+
+      this.songState.downloadQueue$.subscribe(items => {
         this.downloadQueue = items;
         this.processQueue();
       });
+
+      this.songState.songs$.subscribe(items => {
+        this.songs = items;
+      });
+    }
   }
 
   processQueue(): void {
@@ -60,7 +58,7 @@ export class SongManagementComponent implements OnInit, OnDestroy {
         (song: YouTubeItem) => [song.id, true]
       )
     );
-    if(this.nowPlaying !== null) {
+    if (this.nowPlaying !== null) {
       this.isQueued[this.nowPlaying.id] = true;
     }
   }
@@ -81,22 +79,5 @@ export class SongManagementComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit(): void {
-    this.socketService.onReceiveQueue((items: YouTubeItem[]) => {
-      this.queue = items;
-    });
-    this.socketService.onReceiveDownloadQueue((items: YouTubeItem[]) => {
-      this.downloadQueue = items;
-    });
-    this.socketService.onReceiveNowPlaying((item: YouTubeItem) => {
-      this.nowPlaying = item;
-    });
-
-    this.getSongs();
-    this.getData();
-  }
-
-  ngOnDestroy(): void {
-    // no-op for now
-  }
+  ngOnDestroy(): void {}
 }
