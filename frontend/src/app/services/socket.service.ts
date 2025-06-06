@@ -31,10 +31,9 @@ export class SocketService {
       .then(() => console.log('SignalR connected'))
       .catch(err => console.error('Error connecting to SignalR: ', err));
 
-    // Attach visibility change handler for mobile wake-up
-    document.addEventListener('visibilitychange', () => {
+    document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === 'visible') {
-        this.reconnectIfNeeded();
+        location.reload();
       }
     });
   }
