@@ -16,7 +16,6 @@ This project is a full-stack, self-hosted, YouTube-powered jukebox system, desig
 - Search YouTube for songs.
 - Queue songs to play in real-time.
 - Automatic downloading and caching of songs.
-- TouchTunes-style web interface.
 - Runs entirely self-hosted with no third-party streaming services required.
 
 ---
