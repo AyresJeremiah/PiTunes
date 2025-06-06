@@ -1,4 +1,4 @@
-
+![PiTunes Screenshot](frontend/public/assets/pitunes_icon_banner_ver2.png)
 # 🎶 Raspberry Pi Jukebox
 
 This project is a full-stack, self-hosted, YouTube-powered jukebox system, designed to be deployed on a Raspberry Pi or any Linux host.
@@ -99,3 +99,8 @@ This tool uses `yt-dlp` to extract and play audio from YouTube. Please review Yo
 - [FFmpeg](https://ffmpeg.org/)
 - [ASP.NET Core](https://dotnet.microsoft.com/)
 - [Angular](https://angular.io/)
+
+
+![PiTunes Screenshot](images/screenshot1.png)
+![PiTunes Screenshot](images/screenshot2.png)
+![PiTunes Screenshot](images/screenshot3.png)
