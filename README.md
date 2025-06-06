@@ -100,7 +100,10 @@ This tool uses `yt-dlp` to extract and play audio from YouTube. Please review Yo
 - [ASP.NET Core](https://dotnet.microsoft.com/)
 - [Angular](https://angular.io/)
 
+---- ## 📸 Screenshots
 
 ![PiTunes Screenshot](images/screenshot1.png)
+
 ![PiTunes Screenshot](images/screenshot2.png)
+
 ![PiTunes Screenshot](images/screenshot3.png)
