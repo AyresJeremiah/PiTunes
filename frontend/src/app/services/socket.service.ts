@@ -68,22 +68,15 @@ export class SocketService {
     }
   }
 
-  private reconnectIfNeeded(): void {
-    if (!this.hubConnection) {
-      return;
-    }
-
-    const state = this.hubConnection.state;
-
-    if (state === signalR.HubConnectionState.Disconnected) {
-      console.log("Attempting reconnect after wakeup...");
-
-      this.hubConnection
-        .start()
-        .then(() => console.log('SignalR reconnected after wakeup'))
-        .catch(err => console.error('Error reconnecting after wakeup:', err));
+  public stop(): void {
+    if (this.hubConnection) {
+      this.hubConnection.stop()
+        .then(() => console.log('SignalR connection stopped'))
+        .catch(err => console.error('Error stopping SignalR connection:', err));
+      this.hubConnection = null;
     }
   }
+
 
 
 }
