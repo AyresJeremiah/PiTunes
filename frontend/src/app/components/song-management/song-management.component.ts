@@ -69,6 +69,7 @@ export class SongManagementComponent implements OnInit, OnDestroy {
     this.songService.queue(song).subscribe({
       next: () => {
         this.toastService.show('Queued successfully!');
+        this.isQueued[song.id] = true;
       },
       error: () => {
         this.toastService.show('Failed to queue song.');
@@ -81,13 +82,15 @@ export class SongManagementComponent implements OnInit, OnDestroy {
   }
 
   deleteSong(song: YouTubeItem): void {
-    this.isQueueing[song.id] = true;
+    this.isDeleting[song.id] = true;
     this.songService.delete(song).subscribe({
       next: () => {
+        this.isDeleting[song.id] = false;
         this.toastService.show('Deleted successfully!');
       },
       error: () => {
-        this.toastService.show('Failed to queue song.');
+        this.isDeleting[song.id] = false;
+        this.toastService.show('Failed to delete song.');
       }
     });
   }

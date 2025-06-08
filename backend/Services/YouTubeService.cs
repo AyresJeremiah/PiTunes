@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.Json;
 using backend.Models;
-using backend.Hubs;
 using backend.Shared;
 
 namespace backend.Services
@@ -48,6 +47,7 @@ namespace backend.Services
             _ = queueItemResult.AddAsync(new QueueItem(item.Id));
             _incomingQueue.Enqueue(item);
             _queueSignal.Release();
+            await this._songHub.SendDownloadQueueUpdateAsync(_incomingQueue.ToArray());
         }
 
         public void Dequeue(YouTubeItem item)
@@ -138,6 +138,7 @@ namespace backend.Services
 
             if (files.Length == 0)
             {
+                await _songHub.SendNowPlayingUpdateAsync(null);
                 Console.WriteLine("No cached files found.");
                 return;
             }
@@ -195,7 +196,6 @@ namespace backend.Services
             while (!_cts.IsCancellationRequested)
             {
                 await _queueSignal.WaitAsync(_cts.Token);
-                await this._songHub.SendDownloadQueueUpdateAsync(_incomingQueue.ToArray());
                 if (_incomingQueue.TryDequeue(out var item))
                 {
                     try
@@ -204,7 +204,8 @@ namespace backend.Services
                         _queue.Enqueue(item);
                         await this._songHub.SendQueueUpdateAsync(_queue.ToArray());
                         await this._songHub.SendDownloadQueueUpdateAsync(_incomingQueue.ToArray());
-                        await this._songHub.SendDownloadedSong(item);
+                        //Used to notify the client of newly downloaded songs for the management UI
+                        await this._songHub.SendDownloadedSongAsync(item);
                         await CheckAndPlayNext();
                     }
                     catch (Exception ex)

@@ -92,7 +92,7 @@ namespace backend.Controllers
             }
 
             await SongCacheHandler.DeleteCachedSongAsync(item.Id);
-            await songHub.SendDeletedSongFromCache(item);
+            await songHub.SendDeletedSongFromCacheAsync(item);
             return Ok();
         }
 

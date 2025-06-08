@@ -46,7 +46,7 @@ export class SocketService {
 
   public onReceiveDownloadQueue(callback: (items: YouTubeItem[]) => void): void {
     if (this.hubConnection) {
-      this.hubConnection.on("ReceiveDownloadItem", callback);
+      this.hubConnection.on("ReceiveDownloadQueue", callback);
     }
   }
 

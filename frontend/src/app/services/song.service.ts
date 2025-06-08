@@ -17,6 +17,10 @@ export class SongService {
     return this.http.post('/api/songs/queue', song);
   }
 
+  dequeue(song: YouTubeItem): Observable<any> {
+    return this.http.post('/api/songs/dequeue', song);
+  }
+
   getQueue() {
     return this.http.get<YouTubeItem[]>('/api/songs/queue');
   }

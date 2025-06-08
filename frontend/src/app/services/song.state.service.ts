@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { SongService } from './song.service';
-import { SocketService } from './socket.service';
+import {Injectable} from '@angular/core';
+import {BehaviorSubject} from 'rxjs';
+import {SongService} from './song.service';
+import {SocketService} from './socket.service';
 import {YouTubeItem} from 'src/app/models/song.model';
 
 @Injectable({
@@ -22,7 +22,8 @@ export class SongStateService {
   constructor(
     private songService: SongService,
     private socketService: SocketService
-  ) {}
+  ) {
+  }
 
   initialize() {
     // Load initial data via HTTP
@@ -56,9 +57,15 @@ export class SongStateService {
     });
 
     this.socketService.onReceiveDownloadedSong((item: YouTubeItem) => {
-      this.songsSubject.value.push(item);
-      this.songsSubject.next(this.songsSubject.value);
+      const currentSongs = this.songsSubject.value ?? [];
+
+      const exists = currentSongs.some(s => s.id === item.id);
+      if (!exists) {
+        currentSongs.push(item);
+        this.songsSubject.next(currentSongs);
+      }
     });
+
 
     this.socketService.onReceiveDeletedSongFromCache((item: YouTubeItem) => {
       const updatedSongs = this.songsSubject.value.filter(s => s.id !== item.id);
