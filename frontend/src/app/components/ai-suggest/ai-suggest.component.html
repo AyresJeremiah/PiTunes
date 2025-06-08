@@ -7,22 +7,32 @@
   <div class="input-group">
     <input [(ngModel)]="prompt" placeholder="Describe what you're looking for..." />
     <button (click)="submitPrompt()" [disabled]="loading">
-      <i class="fas fa-circle-arrow-right"></i>
-      <span *ngIf="!loading">Generate</span>
-      <span *ngIf="loading" class="spinner"></span>
+      <ng-container *ngIf="!loading; else loadingSpinner">
+        <i class="fas fa-circle-arrow-right"></i>
+      </ng-container>
+      <ng-template #loadingSpinner>
+        <span class="spinner"></span>
+      </ng-template>
     </button>
   </div>
 
   <div *ngIf="error" class="error">{{ error }}</div>
 
-  <ul *ngIf="suggestions.length > 0" class="suggestions-list">
-    <li *ngFor="let suggestion of suggestions">
+  <div class="song-grid">
+    <div class="song-card" *ngFor="let suggestion of suggestions">
       <div class="song-info">
-        <i class="fas fa-music"></i> {{ suggestion.title }} — {{ suggestion.artist }}
+        <div class="song-text">
+          <div class="song-title">{{ suggestion.title }}</div>
+          <div class="song-artist">{{ suggestion.artist }}</div>
+        </div>
       </div>
-      <button (click)="queueSong(suggestion)" class="add-button" >
-        <i class="fas fa-plus"></i>
-      </button>
-    </li>
-  </ul>
+
+      <div class="song-actions">
+        <button (click)="queueSong(suggestion)">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
 </div>

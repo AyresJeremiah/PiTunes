@@ -32,6 +32,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<PiTunesDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.Configure<OllamaSettings>(builder.Configuration.GetSection("Ollama"));
+
 builder.Services.AddScoped<YouTubeItemResult>();
 builder.Services.AddScoped<IQueueItemResult, QueueItemResult>();
 builder.Services.AddSingleton<SongHubService>();

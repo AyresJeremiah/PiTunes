@@ -1,16 +1,19 @@
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Options;
 
 namespace backend.Services;
 
 public class AiSuggestionService
 {
     private readonly HttpClient _httpClient;
-    private const string OllamaEndpoint = "http://localhost:11434/api/generate";
-    private const string Model = "gemma3:4b"; // Or whatever model you are using
-    private const int NumSongs = 15; // Number of song suggestions to return
+    private string _ollamaEndpoint;
+    private string _model = "gemma3:4b"; 
+    private const int NumSongs = 15; 
 
-    public AiSuggestionService(HttpClient httpClient)
+    public AiSuggestionService(HttpClient httpClient, IOptions<OllamaSettings> options)
     {
+        _ollamaEndpoint = options.Value.Endpoint ?? "http://localhost:11434/api/generate";// Default endpoint
+        _model = options.Value.Model ?? "gemma3:4b"; // Default model
         _httpClient = httpClient;
     }
 
@@ -20,12 +23,12 @@ public class AiSuggestionService
 
         var request = new
         {
-            model = Model,
+            model = _model,
             prompt = fullPrompt,
             stream = false
         };
 
-        var response = await _httpClient.PostAsJsonAsync(OllamaEndpoint, request);
+        var response = await _httpClient.PostAsJsonAsync(_ollamaEndpoint, request);
         response.EnsureSuccessStatusCode();
 
         var result = await response.Content.ReadFromJsonAsync<OllamaResponse>();
@@ -39,7 +42,7 @@ public class AiSuggestionService
         return @$"
 You are a music recommendation engine. 
 The user will give you a description or mood, and you will return a list of {NumSongs} song suggestions.
-For each song, give the title and artist in the following format:
+For each song, give the title and artist in the following format without numbering:
 
 Title - Artist
 
