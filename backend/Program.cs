@@ -1,4 +1,4 @@
-using backend.hubs;
+using backend.Hubs;
 using backend.Services;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
@@ -32,9 +32,13 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<PiTunesDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.Configure<OllamaSettings>(builder.Configuration.GetSection("Ollama"));
+
 builder.Services.AddScoped<YouTubeItemResult>();
 builder.Services.AddScoped<IQueueItemResult, QueueItemResult>();
+builder.Services.AddSingleton<SongHubService>();
 builder.Services.AddSingleton<YouTubeService>();
+builder.Services.AddHttpClient<AiSuggestionService>();
 
 builder.Services.AddSignalR();
 

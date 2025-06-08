@@ -1,0 +1,38 @@
+<div class="ai-suggestions">
+  <div class="ai-header">
+    <i class="fas fa-robot"></i>
+    <h3>AI Song Suggestions</h3>
+  </div>
+
+  <div class="input-group">
+    <input [(ngModel)]="prompt" placeholder="Describe what you're looking for..." />
+    <button (click)="submitPrompt()" [disabled]="loading">
+      <ng-container *ngIf="!loading; else loadingSpinner">
+        <i class="fas fa-circle-arrow-right"></i>
+      </ng-container>
+      <ng-template #loadingSpinner>
+        <span class="spinner"></span>
+      </ng-template>
+    </button>
+  </div>
+
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <div class="song-grid">
+    <div class="song-card" *ngFor="let suggestion of suggestions">
+      <div class="song-info">
+        <div class="song-text">
+          <div class="song-title">{{ suggestion.title }}</div>
+          <div class="song-artist">{{ suggestion.artist }}</div>
+        </div>
+      </div>
+
+      <div class="song-actions">
+        <button (click)="queueSong(suggestion)">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

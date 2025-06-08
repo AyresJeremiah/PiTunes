@@ -68,6 +68,7 @@ export class SearchComponent implements OnInit, OnDestroy {
     this.songService.queue(song).subscribe({
       next: () => {
         this.toastService.show('Queued successfully!');
+        this.isQueued[song.id] = true;
       },
       error: () => {
         this.toastService.show('Failed to queue song.');
@@ -85,6 +86,9 @@ export class SearchComponent implements OnInit, OnDestroy {
         (song: YouTubeItem) => [song.id, true]
       )
     );
+    if (this.nowPlaying !== null) {
+      this.isQueued[this.nowPlaying.id] = true;
+    }
   }
 
   skip(): void {

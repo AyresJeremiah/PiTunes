@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { YouTubeItem } from 'app/models/song.model';
 import { SongService } from 'src/app/services/song.service';
 import {SongStateService} from 'src/app/services/song.state.service';
+import {ToastService} from 'src/app/services/toast.service';
 
 @Component({
   selector: 'app-queue',
@@ -16,10 +17,12 @@ import {SongStateService} from 'src/app/services/song.state.service';
 export class QueueComponent implements OnInit, OnDestroy {
   queue: YouTubeItem[] = [];
   downloadQueue: YouTubeItem[] = [];
+  isDequeuing: { [id: string]: boolean } = {};
 
   constructor(
     private songService: SongService,
     private songState: SongStateService,
+    private toastService: ToastService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -33,6 +36,20 @@ export class QueueComponent implements OnInit, OnDestroy {
         this.downloadQueue = items;
       });
     }
+  }
+
+  dequeueSong(song: YouTubeItem): void {
+    this.isDequeuing[song.id] = true;
+    this.songService.dequeue(song).subscribe({
+      next: () => {
+        this.toastService.show('Dequeued successfully!');
+        this.isDequeuing[song.id] = false;
+      },
+      error: () => {
+        this.isDequeuing[song.id] = false;
+        this.toastService.show('Failed to dequeue song.');
+      }
+    });
   }
 
   ngOnDestroy(): void {}

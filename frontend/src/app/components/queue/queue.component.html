@@ -6,8 +6,15 @@
     <div class="song-info">
       <div class="song-title">{{ song.title }}</div>
     </div>
+    <div class="song-actions">
+      <button (click)="dequeueSong(song)" [disabled]="isDequeuing[song.id]">
+        <span *ngIf="isDequeuing[song.id]" class="spinner"></span>
+        <span *ngIf="!isDequeuing[song.id]">
+          <i class="fa-solid fa-x"></i>
+        </span>
+      </button>
+    </div>
   </div>
-
 
   <div *ngIf="downloadQueue.length > 0"><h2>Downloading</h2></div>
   <div *ngFor="let song of downloadQueue" class="queue-item horizontal-card">

@@ -1,11 +1,9 @@
-import { Component, Output, EventEmitter, HostBinding } from '@angular/core';
-import { NgIf } from '@angular/common';
+import { Component, Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-slide-up-drawer',
   standalone: true,
   templateUrl: './slide-up-drawer.component.html',
-  imports: [NgIf],
   styleUrls: ['./slide-up-drawer.component.scss']
 })
 export class SlideUpDrawerComponent {

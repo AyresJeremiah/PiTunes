@@ -21,6 +21,7 @@ export class SongManagementComponent implements OnInit, OnDestroy {
   isQueueing: { [id: string]: boolean } = {};
   isQueued: { [id: string]: boolean } = {};
   nowPlaying: YouTubeItem | null = null;
+  isDeleting: { [id: string]: boolean } = {};
 
   constructor(
     private toastService: ToastService,
@@ -68,6 +69,7 @@ export class SongManagementComponent implements OnInit, OnDestroy {
     this.songService.queue(song).subscribe({
       next: () => {
         this.toastService.show('Queued successfully!');
+        this.isQueued[song.id] = true;
       },
       error: () => {
         this.toastService.show('Failed to queue song.');
@@ -75,6 +77,20 @@ export class SongManagementComponent implements OnInit, OnDestroy {
       },
       complete: () => {
         this.isQueueing[song.id] = false;
+      }
+    });
+  }
+
+  deleteSong(song: YouTubeItem): void {
+    this.isDeleting[song.id] = true;
+    this.songService.delete(song).subscribe({
+      next: () => {
+        this.isDeleting[song.id] = false;
+        this.toastService.show('Deleted successfully!');
+      },
+      error: () => {
+        this.isDeleting[song.id] = false;
+        this.toastService.show('Failed to delete song.');
       }
     });
   }
