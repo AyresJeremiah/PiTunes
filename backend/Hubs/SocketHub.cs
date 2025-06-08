@@ -1,7 +1,7 @@
 using backend.Models;
 using Microsoft.AspNetCore.SignalR;
 
-namespace backend.hubs
+namespace backend.Hubs
 {
     public class SocketHub : Hub
     {

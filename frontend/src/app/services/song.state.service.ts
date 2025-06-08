@@ -59,6 +59,11 @@ export class SongStateService {
       this.songsSubject.value.push(item);
       this.songsSubject.next(this.songsSubject.value);
     });
+
+    this.socketService.onReceiveDeletedSongFromCache((item: YouTubeItem) => {
+      const updatedSongs = this.songsSubject.value.filter(s => s.id !== item.id);
+      this.songsSubject.next(updatedSongs);
+    });
   }
 
   // Optional manual refresh if needed

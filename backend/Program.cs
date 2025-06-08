@@ -1,4 +1,4 @@
-using backend.hubs;
+using backend.Hubs;
 using backend.Services;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +34,7 @@ builder.Services.AddDbContext<PiTunesDbContext>(options =>
 
 builder.Services.AddScoped<YouTubeItemResult>();
 builder.Services.AddScoped<IQueueItemResult, QueueItemResult>();
+builder.Services.AddSingleton<SongHubService>();
 builder.Services.AddSingleton<YouTubeService>();
 
 builder.Services.AddSignalR();

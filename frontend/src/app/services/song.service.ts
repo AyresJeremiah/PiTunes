@@ -36,4 +36,8 @@ export class SongService {
   getSongs() {
     return this.http.get<YouTubeItem[]>('/api/songs/downloaded');
   }
+
+  delete(song: YouTubeItem): Observable<any> {
+    return this.http.post('/api/songs/delete', song);
+  }
 }

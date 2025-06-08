@@ -7,28 +7,30 @@
       <div class="song-info">
         <div class="song-title">{{ song.title }}</div>
         <div class="song-actions">
-          <a class="song-link" href="{{ song.url }}" target="_blank">
-            <i class="fas fa-external-link-alt"></i>
-          </a>
+          <button class="song-delete" (click)="deleteSong(song)" [disabled]="isDeleting[song.id]">
+            <span *ngIf="isDeleting[song.id]" class="spinner"></span>
+            <span *ngIf="!isDeleting[song.id]">
+              <i class="fa-solid fa-trash"></i>
+            </span>
+          </button>
 
           <ng-container *ngIf="!isQueued[song.id]; else queued">
             <button [disabled]="isQueueing[song.id]" (click)="queueSong(song)">
               <span *ngIf="isQueueing[song.id]" class="spinner"></span>
               <span *ngIf="!isQueueing[song.id]">
-              <i class="fas fa-plus"></i>
-            </span>
+                <i class="fas fa-plus"></i>
+              </span>
             </button>
           </ng-container>
 
           <ng-template #queued>
-          <span class="queued-label">
-            <i class="fas fa-check"></i> In Queue
-          </span>
+            <span class="queued-label">
+              <i class="fas fa-check"></i> In Queue
+            </span>
           </ng-template>
 
         </div>
       </div>
     </div>
   </div>
-
 </div>

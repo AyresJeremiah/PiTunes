@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.Json;
 using backend.Models;
-using backend.hubs;
+using backend.Hubs;
 using backend.Shared;
 
 namespace backend.Services
@@ -14,13 +14,13 @@ namespace backend.Services
         private readonly CancellationTokenSource _cts = new();
         private readonly SemaphoreSlim _queueSignal = new(0);
         private readonly IServiceScopeFactory _scopeFactory;
-        private readonly SongHub _songHub;
+        private readonly SongHubService _songHub;
 
         private Process? _ffplayProcess;
         private bool _isPlaying = false;
         private YouTubeItem? _nowPlaying;
 
-        public YouTubeService(IServiceScopeFactory scopeFactory, SongHub songHub)
+        public YouTubeService(IServiceScopeFactory scopeFactory, SongHubService songHub)
         {
             _scopeFactory = scopeFactory;
             _songHub = songHub;

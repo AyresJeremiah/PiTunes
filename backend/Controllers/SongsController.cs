@@ -1,4 +1,4 @@
-using backend.hubs;
+using backend.Hubs;
 using backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using backend.Services;
@@ -12,11 +12,9 @@ namespace backend.Controllers
         YouTubeService youtube,
         YouTubeItemResult youTubeItemResult,
         IQueueItemResult queueItemResult,
-        SongHub songHub)
+        SongHubService songHub)
         : ControllerBase
     {
-        private readonly SongHub _songHub = songHub;
-
         [HttpGet("search")]
         public async Task<IActionResult> Search(string query)
         {
@@ -84,7 +82,7 @@ namespace backend.Controllers
                 throw new FileNotFoundException($"YouTubeItem with ID {request.Id} not found.");
             }
             await SongCacheHandler.DeleteCachedSongAsync(item.Id);
-            await _songHub.SendDeletedSongFromCache(item);
+            await songHub.SendDeletedSongFromCache(item);
             return Ok();
         }
         
