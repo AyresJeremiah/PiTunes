@@ -5,19 +5,12 @@
 <main class="main">
 
   <div class ='main-page-layout'>
-  <app-search></app-search>
 
-  <app-toast></app-toast>
-  <app-now-playing></app-now-playing>
+    <app-now-playing></app-now-playing>
+    <app-queue></app-queue>
 
   </div>
-
-  <app-slide-up-drawer>
-    <div style="padding: 20px;">
-      <app-queue></app-queue>
-    </div>
-  </app-slide-up-drawer>
-
+  <br><br><br>
   <app-bottom-tray>
 
     <app-slide-up-drawer>
@@ -28,9 +21,11 @@
 
     <app-slide-up-drawer>
       <div style="padding: 20px;">
-        <app-queue></app-queue>
+        <app-search></app-search>
       </div>
     </app-slide-up-drawer>
 
   </app-bottom-tray>
+
+  <app-toast></app-toast>
 </main>

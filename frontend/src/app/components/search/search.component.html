@@ -1,6 +1,6 @@
 
   <div class="search-bar">
-    <input [(ngModel)]="query" placeholder="Search YouTube..." />
+    <input [(ngModel)]="query" placeholder="Search a Song..." />
     <button (click)="search()" [disabled]="isSearching">
       <span *ngIf="isSearching" class="spinner"></span>
       <span *ngIf="!isSearching">
