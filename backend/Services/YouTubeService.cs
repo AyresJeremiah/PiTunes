@@ -50,13 +50,14 @@ namespace backend.Services
             await this._songHub.SendDownloadQueueUpdateAsync(_incomingQueue.ToArray());
         }
 
-        public void Dequeue(YouTubeItem item)
+        public async Task Dequeue(YouTubeItem item, IQueueItemResult queueItemResult)
         {
             if (_queue.All(x => x.Id != item.Id))
             {
                return;
             } 
             var tempQueue = new Queue<YouTubeItem>();
+            await queueItemResult.DeleteByVideoIdAsync(item.Id);
 
             while (_queue.TryDequeue(out var tempItem))
             {

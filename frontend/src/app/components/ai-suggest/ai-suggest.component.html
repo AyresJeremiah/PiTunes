@@ -1,17 +1,28 @@
 <div class="ai-suggestions">
-  <h3>AI Song Suggestions</h3>
+  <div class="ai-header">
+    <i class="fas fa-robot"></i>
+    <h3>AI Song Suggestions</h3>
+  </div>
 
   <div class="input-group">
     <input [(ngModel)]="prompt" placeholder="Describe what you're looking for..." />
-    <button (click)="submitPrompt()" [disabled]="loading">Go</button>
+    <button (click)="submitPrompt()" [disabled]="loading">
+      <i class="fas fa-circle-arrow-right"></i>
+      <span *ngIf="!loading">Generate</span>
+      <span *ngIf="loading" class="spinner"></span>
+    </button>
   </div>
 
-  <div *ngIf="loading" class="loading">Loading...</div>
   <div *ngIf="error" class="error">{{ error }}</div>
 
-  <ul *ngIf="suggestions.length > 0">
+  <ul *ngIf="suggestions.length > 0" class="suggestions-list">
     <li *ngFor="let suggestion of suggestions">
-      {{ suggestion.title }} — {{ suggestion.artist }}
+      <div class="song-info">
+        <i class="fas fa-music"></i> {{ suggestion.title }} — {{ suggestion.artist }}
+      </div>
+      <button (click)="queueSong(suggestion)" class="add-button" >
+        <i class="fas fa-plus"></i>
+      </button>
     </li>
   </ul>
 </div>

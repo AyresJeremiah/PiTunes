@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { YouTubeItem } from '../models/song.model';
 import {SuggestRequest} from 'src/app/models/suggestRequest.model';
+import {AiSongSuggestion} from 'src/app/models/aiSongSuggestion.model';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +17,10 @@ export class SongService {
 
   queue(song: YouTubeItem): Observable<any> {
     return this.http.post('/api/songs/queue', song);
+  }
+
+  queueAiSong(song: AiSongSuggestion): Observable<any> {
+    return this.http.post('/api/songs/ai-queue', song);
   }
 
   dequeue(song: YouTubeItem): Observable<any> {

@@ -7,7 +7,7 @@ public class AiSuggestionService
     private readonly HttpClient _httpClient;
     private const string OllamaEndpoint = "http://localhost:11434/api/generate";
     private const string Model = "gemma3:4b"; // Or whatever model you are using
-    private const int NumSongs = 5; // Number of song suggestions to return
+    private const int NumSongs = 15; // Number of song suggestions to return
 
     public AiSuggestionService(HttpClient httpClient)
     {

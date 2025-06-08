@@ -1,4 +1,3 @@
-using backend.Hubs;
 using backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using backend.Services;
@@ -89,7 +88,7 @@ namespace backend.Controllers
             }
             else
             {
-                youtube.Dequeue(item);
+                await youtube.Dequeue(item, queueItemResult);
             }
 
             await SongCacheHandler.DeleteCachedSongAsync(item.Id);
@@ -98,9 +97,9 @@ namespace backend.Controllers
         }
 
         [HttpPost("dequeue")]
-        public IActionResult Dequeue([FromBody] YouTubeItem request)
+        public async Task<IActionResult> Dequeue([FromBody] YouTubeItem request)
         {
-            youtube.Dequeue(request);
+            await youtube.Dequeue(request,queueItemResult);
             return Ok();
         }
         
@@ -109,6 +108,16 @@ namespace backend.Controllers
         {
             var suggestions = await aiService.GetSuggestionsAsync(request.Prompt);
             return Ok(suggestions);
+        }
+        
+        [HttpPost("ai-queue")]
+        public async Task<IActionResult> AiQueue(AiSongSuggestion song)
+        {
+            var results = await YouTubeService.SearchAsync(song.ToString());
+            await youTubeItemResult.AddMultipleAsync(results);
+            await youtube.EnqueueAsync(results[0].Id, queueItemResult, youTubeItemResult);
+            
+            return Ok();
         }
     }
 }
