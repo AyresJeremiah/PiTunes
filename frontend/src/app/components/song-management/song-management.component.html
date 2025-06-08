@@ -3,7 +3,7 @@
   <div *ngIf="songs.length === 0" class="queue-empty">You don't have any songs yet</div>
   <div class="song-grid">
     <div class="song-card horizontal-card" *ngFor="let song of songs">
-      <img [src]="song.thumbnail" alt="Cover" class="thumbnail" />
+<!--      <img [src]="song.thumbnail" alt="Cover" class="thumbnail" />-->
       <div class="song-info">
         <div class="song-title">{{ song.title }}</div>
         <div class="song-actions">

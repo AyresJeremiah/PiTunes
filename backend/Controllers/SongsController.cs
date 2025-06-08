@@ -29,14 +29,14 @@ namespace backend.Controllers
             await youtube.EnqueueAsync(request.Id, queueItemResult, youTubeItemResult);
             return Ok();
         }
-        
+
         [HttpGet("queue")]
         public IActionResult GetQueue()
         {
             var queue = youtube.GetQueue();
             return Ok(queue);
         }
-        
+
         [HttpGet("downloaded")]
         public async Task<IActionResult> GetDownloadedSongs()
         {
@@ -50,21 +50,21 @@ namespace backend.Controllers
 
             return Ok(downloadedItems);
         }
-        
+
         [HttpGet("download-queue")]
         public IActionResult GetDownloadQueue()
         {
             var queue = youtube.GetDownloadQueue();
             return Ok(queue);
         }
-        
+
         [HttpGet("now-playing")]
         public IActionResult GetNowPlaying()
         {
             var queue = youtube.GetNowPlaying();
             return Ok(queue);
         }
-        
+
         [HttpPost("skip")]
         public IActionResult Skip()
         {
@@ -75,16 +75,32 @@ namespace backend.Controllers
         [HttpPost("delete")]
         public async Task<IActionResult> Delete([FromBody] YouTubeItem request)
         {
-            
             var item = await youTubeItemResult.GetByIdAsync(request.Id);
+
             if (item == null)
             {
                 throw new FileNotFoundException($"YouTubeItem with ID {request.Id} not found.");
             }
+
+            if (youtube.GetNowPlaying()?.Id == item.Id)
+            {
+                youtube.Skip();
+            }
+            else
+            {
+                youtube.Dequeue(item);
+            }
+
             await SongCacheHandler.DeleteCachedSongAsync(item.Id);
             await songHub.SendDeletedSongFromCache(item);
             return Ok();
         }
-        
+
+        [HttpPost("dequeue")]
+        public IActionResult Dequeue([FromBody] YouTubeItem request)
+        {
+            youtube.Dequeue(request);
+            return Ok();
+        }
     }
 }

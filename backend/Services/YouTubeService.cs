@@ -50,6 +50,30 @@ namespace backend.Services
             _queueSignal.Release();
         }
 
+        public void Dequeue(YouTubeItem item)
+        {
+            if (_queue.All(x => x.Id != item.Id))
+            {
+               return;
+            } 
+            var tempQueue = new Queue<YouTubeItem>();
+
+            while (_queue.TryDequeue(out var tempItem))
+            {
+                if (tempItem.Id != item.Id)
+                {
+                    tempQueue.Enqueue(tempItem);
+                }
+            }
+            
+            foreach (var tempItem in tempQueue)
+            {
+                _queue.Enqueue(tempItem);
+            }
+
+            _ = _songHub.SendQueueUpdateAsync(_queue.ToArray());
+        }
+
         public Queue<YouTubeItem> GetQueue() => new Queue<YouTubeItem>(_queue);
 
         public Queue<YouTubeItem> GetDownloadQueue() => new Queue<YouTubeItem>(_incomingQueue);
@@ -104,7 +128,7 @@ namespace backend.Services
 
             return results;
         }
-       
+
         //Processes Handling
         private async Task PlayRandom()
         {
@@ -190,7 +214,7 @@ namespace backend.Services
                 }
             }
         }
-        
+
         private async Task CheckAndPlayNext()
         {
             if (_isPlaying) return;
@@ -244,7 +268,5 @@ namespace backend.Services
 
             await this.CheckAndPlayNext();
         }
-
-
     }
 }
