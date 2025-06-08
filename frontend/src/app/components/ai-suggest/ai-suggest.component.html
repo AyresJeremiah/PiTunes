@@ -1,0 +1,17 @@
+<div class="ai-suggestions">
+  <h3>AI Song Suggestions</h3>
+
+  <div class="input-group">
+    <input [(ngModel)]="prompt" placeholder="Describe what you're looking for..." />
+    <button (click)="submitPrompt()" [disabled]="loading">Go</button>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <ul *ngIf="suggestions.length > 0">
+    <li *ngFor="let suggestion of suggestions">
+      {{ suggestion.title }} — {{ suggestion.artist }}
+    </li>
+  </ul>
+</div>

@@ -12,6 +12,7 @@ import {SongManagementComponent} from 'src/app/components/song-management/song-m
 import {SongStateService} from 'src/app/services/song.state.service';
 import {SearchComponent} from 'src/app/components/search/search.component';
 import {NowPlayingComponent} from 'src/app/components/now-playing/now-playing.component';
+import {AiSuggestComponent} from 'src/app/components/ai-suggest/ai-suggest.component';
 
 @Component({
   selector: 'app-root',
@@ -30,7 +31,8 @@ import {NowPlayingComponent} from 'src/app/components/now-playing/now-playing.co
     SearchComponent,
     SearchComponent,
     SearchComponent,
-    NowPlayingComponent
+    NowPlayingComponent,
+    AiSuggestComponent
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']

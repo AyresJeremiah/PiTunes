@@ -36,6 +36,7 @@ builder.Services.AddScoped<YouTubeItemResult>();
 builder.Services.AddScoped<IQueueItemResult, QueueItemResult>();
 builder.Services.AddSingleton<SongHubService>();
 builder.Services.AddSingleton<YouTubeService>();
+builder.Services.AddHttpClient<AiSuggestionService>();
 
 builder.Services.AddSignalR();
 

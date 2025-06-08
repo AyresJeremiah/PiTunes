@@ -12,7 +12,8 @@ namespace backend.Controllers
         YouTubeService youtube,
         YouTubeItemResult youTubeItemResult,
         IQueueItemResult queueItemResult,
-        SongHubService songHub)
+        SongHubService songHub,
+        AiSuggestionService aiService)
         : ControllerBase
     {
         [HttpGet("search")]
@@ -101,6 +102,13 @@ namespace backend.Controllers
         {
             youtube.Dequeue(request);
             return Ok();
+        }
+        
+        [HttpPost("suggest")]
+        public async Task<IActionResult> Suggest([FromBody] SuggestRequest request)
+        {
+            var suggestions = await aiService.GetSuggestionsAsync(request.Prompt);
+            return Ok(suggestions);
         }
     }
 }

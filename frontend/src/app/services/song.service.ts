@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { YouTubeItem } from '../models/song.model';
+import {SuggestRequest} from 'src/app/models/suggestRequest.model';
 
 @Injectable({
   providedIn: 'root'
@@ -43,5 +44,9 @@ export class SongService {
 
   delete(song: YouTubeItem): Observable<any> {
     return this.http.post('/api/songs/delete', song);
+  }
+
+  aiSuggest(request: SuggestRequest): Observable<any> {
+    return this.http.post('/api/songs/suggest', request);
   }
 }
