@@ -3,14 +3,23 @@
   <h1>PiTunes</h1>
 </div>
 <main class="main">
+
+  <div class ='main-page-layout'>
   <app-search></app-search>
+
   <app-toast></app-toast>
+  <app-now-playing></app-now-playing>
+
+  </div>
+
   <app-slide-up-drawer>
     <div style="padding: 20px;">
       <app-queue></app-queue>
     </div>
   </app-slide-up-drawer>
+
   <app-bottom-tray>
+
     <app-slide-up-drawer>
       <div style="padding: 20px;">
         <app-song-management></app-song-management>
@@ -22,5 +31,6 @@
         <app-queue></app-queue>
       </div>
     </app-slide-up-drawer>
+
   </app-bottom-tray>
 </main>
