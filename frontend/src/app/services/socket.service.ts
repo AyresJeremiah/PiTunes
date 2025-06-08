@@ -46,7 +46,13 @@ export class SocketService {
 
   public onReceiveDownloadQueue(callback: (items: YouTubeItem[]) => void): void {
     if (this.hubConnection) {
-      this.hubConnection.on("ReceiveDownloadQueue", callback);
+      this.hubConnection.on("ReceiveDownloadItem", callback);
+    }
+  }
+
+  public onReceiveDeletedSongFromCache(callback: (item: YouTubeItem) => void): void {
+    if (this.hubConnection) {
+      this.hubConnection.on("ReceiveDeletedSongFromCache", callback);
     }
   }
 
