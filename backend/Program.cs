@@ -42,6 +42,12 @@ builder.Services.AddHttpClient<AiSuggestionService>();
 
 builder.Services.AddSignalR();
 
+if (builder.Environment.IsDevelopment())
+{
+    builder.WebHost.UseUrls("http://0.0.0.0:5219");
+}
+
+
 var app = builder.Build();
 
 app.UseHttpsRedirection();
