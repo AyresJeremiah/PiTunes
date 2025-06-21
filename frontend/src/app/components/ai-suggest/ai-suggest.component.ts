@@ -21,6 +21,8 @@ export class AiSuggestComponent {
   suggestions: AiSongSuggestion[] = [];
   loading: boolean = false;
   error: string = '';
+  isQueueing: { [id: string]: boolean } = {};
+  isQueued: { [id: string]: boolean } = {};
 
   constructor(
     private songService: SongService,
@@ -30,6 +32,8 @@ export class AiSuggestComponent {
 
   submitPrompt() {
     if (!this.prompt) return;
+    this.isQueueing = {};
+    this.isQueued = {};
 
     this.loading = true;
     this.error = '';
@@ -48,12 +52,15 @@ export class AiSuggestComponent {
 
   }
   queueSong(song: AiSongSuggestion): void {
+    this.isQueueing[song.title+song.artist] = true;
     this.songService.queueAiSong(song).subscribe({
       next: () => {
         this.toastService.show('Queued successfully!');
+        this.isQueued[song.title+song.artist] = true;
       },
       error: () => {
         this.toastService.show('Failed to queue song.');
+        this.isQueueing[song.title+song.artist] = false;
       },
       complete: () => {
       }
