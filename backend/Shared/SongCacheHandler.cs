@@ -111,6 +111,16 @@ public static class SongCacheHandler
             CreateNoWindow = true
         };
 
+        
+        // var ffplay = new ProcessStartInfo
+        // {
+        //     FileName = FfplayPath,
+        //     Arguments = $"-nodisp -autoexit \"{filePath}\"",
+        //     RedirectStandardInput = false,
+        //     UseShellExecute = false,
+        //     CreateNoWindow = true
+        // };
+
         var ffplayProcess = Process.Start(ffplay);
 
         if (ffplayProcess == null)

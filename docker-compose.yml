@@ -18,6 +18,7 @@ services:
       - postgres
     networks:
       - PiTunes-net
+#    Audio for raspberry Pi Comment out if not on a Raspberry Pi or configure as needed
     devices:
       - /dev/snd
 

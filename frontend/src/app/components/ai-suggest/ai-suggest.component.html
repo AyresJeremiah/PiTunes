@@ -5,7 +5,7 @@
   </div>
 
   <div class="input-group">
-    <input [(ngModel)]="prompt" placeholder="Describe what you're looking for..." />
+    <input [(ngModel)]="prompt" placeholder="Describe what you're looking for..."/>
     <button (click)="submitPrompt()" [disabled]="loading">
       <ng-container *ngIf="!loading; else loadingSpinner">
         <i class="fas fa-circle-arrow-right"></i>
@@ -28,9 +28,14 @@
       </div>
 
       <div class="song-actions">
-        <button (click)="queueSong(suggestion)">
-          <i class="fas fa-plus"></i>
-        </button>
+        <ng-container *ngIf="!isQueued[suggestion.title+suggestion.artist];">
+          <button [disabled]="isQueueing[suggestion.title+suggestion.artist]" (click)="queueSong(suggestion)">
+            <span *ngIf="isQueueing[suggestion.title+suggestion.artist]" class="spinner"></span>
+            <span *ngIf="!isQueueing[suggestion.title+suggestion.artist]">
+                <i class="fas fa-plus"></i>
+              </span>
+          </button>
+        </ng-container>
       </div>
 
     </div>

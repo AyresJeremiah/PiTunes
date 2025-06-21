@@ -2,9 +2,11 @@
   <button class="tray-button" (click)="toggleDrawer(0)">
     <i class="fas fa-music"></i>
   </button>
-  <button class="tray-button" (click)="toggleDrawer(1)">
-    <i class="fas fa-robot"></i>
-  </button>
+  <ng-container *ngIf="aiEnabled">
+    <button class="tray-button" (click)="toggleDrawer(1)">
+      <i class="fas fa-robot"></i>
+    </button>
+  </ng-container>
   <button class="tray-button" (click)="toggleDrawer(2)">
     <i class="fas fa-search"></i>
   </button>

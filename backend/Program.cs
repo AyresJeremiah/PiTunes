@@ -40,7 +40,17 @@ builder.Services.AddSingleton<SongHubService>();
 builder.Services.AddSingleton<YouTubeService>();
 builder.Services.AddHttpClient<AiSuggestionService>();
 
+builder.Services.Configure<FeatureOptions>(
+    builder.Configuration.GetSection("Features"));
+
+
 builder.Services.AddSignalR();
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.WebHost.UseUrls("http://0.0.0.0:5219");
+}
+
 
 var app = builder.Build();
 
