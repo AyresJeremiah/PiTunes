@@ -59,6 +59,47 @@ sudo bash install.sh
 - Be sure your Raspberry Pi is properly configured for audio output.
 - Test sound output with:
 
+## 🧠 AI Integration (Optional)
+
+PiTunes supports optional AI-based song suggestion functionality using a local [Ollama](https://ollama.com/) instance. To enable this feature:
+
+### 1. **Enable AI in `appsettings.json`**
+
+Inside the `backend/appsettings.json` file, locate or add the following section:
+
+```json
+"Features": {
+  "AIEnabled": true
+}
+```
+
+> Set `AIEnabled` to `false` to hide the AI UI and disable suggestion features.
+
+---
+
+### 2. **Configure Ollama (Optional)**
+
+To customize the model or endpoint used for AI generation, update the `Ollama` section:
+
+```json
+"Ollama": {
+  "Endpoint": "http://localhost:11434/api/generate",
+  "Model": "gemma3:4b"
+}
+```
+
+- `Endpoint`: URL of your Ollama server (default: `localhost:11434`)
+- `Model`: Name of the model to use for generation (e.g., `llama3:8b`, `gemma3:4b`, etc.)
+
+> Ollama must be running on the host for AI features to work. See [https://ollama.com](https://ollama.com) for installation instructions.
+
+---
+
+### 3. **Frontend Behavior**
+
+When `AIEnabled` is set to `false`, the Angular UI will automatically hide all AI-related components at startup. No extra steps are needed.
+
+
 ```bash
 speaker-test -c2 -t sine
 ```
