@@ -147,3 +147,5 @@ This tool uses `yt-dlp` to extract and play audio from YouTube. Please review Yo
 ![PiTunes Screenshot](images/screenshot2.png)
 
 ![PiTunes Screenshot](images/screenshot3.png)
+
+![PiTunes Screenshot](images/screenshot4.png)
