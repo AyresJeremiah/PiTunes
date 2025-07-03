@@ -25,6 +25,8 @@ namespace backend.Services
             _songHub = songHub;
             SongCacheHandler.CreateCacheDirectory();
             _ = this.LoadQueueFromDbAsync();
+            UpdateYtDlp();
+            //TODO Need to update the download service using 'pip install -U yt-dlp'
             Task.Run(ProcessIncomingQueue);
         }
 
@@ -246,6 +248,43 @@ namespace backend.Services
         }
 
         //On Start
+        private static void UpdateYtDlp()
+        {
+            try
+            {
+                var processInfo = new ProcessStartInfo
+                {
+                    FileName = "yt-dlp",
+                    Arguments = "-U",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using (var process = Process.Start(processInfo))
+                {
+                    string output = process.StandardOutput.ReadToEnd();
+                    string error = process.StandardError.ReadToEnd();
+
+                    process.WaitForExit();
+
+                    Console.WriteLine("yt-dlp update output:");
+                    Console.WriteLine(output);
+
+                    if (!string.IsNullOrEmpty(error))
+                    {
+                        Console.WriteLine("yt-dlp update errors:");
+                        Console.WriteLine(error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating yt-dlp: {ex.Message}");
+            }
+        }
+        
         private async Task LoadQueueFromDbAsync()
         {
             using var scope = _scopeFactory.CreateScope();
