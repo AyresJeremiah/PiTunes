@@ -49,6 +49,13 @@ namespace backend.Services
             _queueSignal.Release();
             await this._songHub.SendDownloadQueueUpdateAsync(_incomingQueue.ToArray());
         }
+        
+        private async Task ReEnqueueAsync(YouTubeItem item) 
+        {
+            _incomingQueue.Enqueue(item);
+            _queueSignal.Release();
+            await this._songHub.SendDownloadQueueUpdateAsync(_incomingQueue.ToArray());
+        }
 
         public async Task Dequeue(YouTubeItem item, IQueueItemResult queueItemResult)
         {
@@ -211,6 +218,8 @@ namespace backend.Services
                     }
                     catch (Exception ex)
                     {
+                        //Readd the item to the incoming queue if processing fails.
+                        await this.ReEnqueueAsync(item);
                         Console.WriteLine($"Error processing queue: {ex.Message}");
                     }
                 }
