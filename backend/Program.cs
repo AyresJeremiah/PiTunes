@@ -2,23 +2,25 @@ using backend.Hubs;
 using backend.Services;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Wire services (only what you need)
+// Wire services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// CORS (keep this for your Angular frontend)
+// CORS – keep this for dev when Angular runs on 4200
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", builder =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
-        builder
+        policy
             .WithOrigins(
-                "http://localhost:4200", 
-                "https://localhost:4200", 
+                "http://localhost:4200",
+                "https://localhost:4200",
                 "http://frontend"
             )
             .AllowAnyHeader()
@@ -27,8 +29,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-
-// Add DbContext with Postgres
+// DbContext with Postgres
 builder.Services.AddDbContext<PiTunesDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -43,21 +44,24 @@ builder.Services.AddHttpClient<AiSuggestionService>();
 builder.Services.Configure<FeatureOptions>(
     builder.Configuration.GetSection("Features"));
 
-
 builder.Services.AddSignalR();
 
-if (builder.Environment.IsDevelopment())
-{
-    builder.WebHost.UseUrls("http://0.0.0.0:5219");
-}
-
+// Use a consistent URL in all environments (optional, but nice)
+builder.WebHost.UseUrls("http://localhost:5219");
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
-app.UseCors("AllowFrontend");
+// ----- MIDDLEWARE PIPELINE -----
 
-app.MapHub<SocketHub>("api/hubs/socket");
+app.UseHttpsRedirection();
+
+// Serve Angular from wwwroot
+app.UseStaticFiles();
+
+app.UseRouting();
+
+// CORS (mainly needed when Angular runs on 4200 in dev)
+app.UseCors("AllowFrontend");
 
 if (app.Environment.IsDevelopment())
 {
@@ -66,7 +70,7 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-// Run migrations automatically on startup
+    // Run migrations automatically on startup
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<PiTunesDbContext>();
 
@@ -87,6 +91,29 @@ else
     }
 }
 
+// Map endpoints
 app.MapControllers();
+app.MapHub<SocketHub>("/api/hubs/socket");
+
+// For Angular SPA: anything not matching API/Hub goes to index.html
+app.MapFallbackToFile("index.html");
+
+// Optional: auto-open browser on Windows
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+{
+    var url = "http://localhost:5219";
+    try
+    {
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = url,
+            UseShellExecute = true
+        });
+    }
+    catch
+    {
+        // ignore
+    }
+}
 
 app.Run();

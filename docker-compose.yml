@@ -19,8 +19,8 @@ services:
     networks:
       - PiTunes-net
 #    Audio for raspberry Pi Comment out if not on a Raspberry Pi or configure as needed
-    devices:
-      - /dev/snd
+#    devices:
+#      - /dev/snd
 
   frontend:
     build: ./frontend
